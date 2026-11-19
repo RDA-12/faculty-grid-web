@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "react", "unicorn", "oxc", "typescript", "nextjs"],
+  "ignorePatterns": ["node_modules/**", ".next/**", "dist/**", "build/**"],
+  "rules": {
+    "typescript/no-explicit-any": "off",
+    "typescript/no-floating-promises": "error"
+  },
+  "env": {
+    "node": true
+  },
+  "options": {
+    "typeAware": true
+  }
+}
