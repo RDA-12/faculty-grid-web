@@ -1,5 +1,11 @@
 import { getLogger } from './logger'
-import { getSessionData, setSession, User, UserToken } from './user-session'
+import {
+  clearSessionData,
+  getSessionData,
+  setSession,
+  User,
+  UserToken,
+} from './user-session'
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -33,7 +39,8 @@ async function refreshToken(): Promise<UserToken | null> {
   const session = await getSessionData()
 
   if (!session.refreshToken) {
-    logger.debug('refreshToken not exists')
+    logger.debug('refreshToken not exists. clear session data')
+    await clearSessionData()
     return null
   }
 
@@ -44,7 +51,8 @@ async function refreshToken(): Promise<UserToken | null> {
     },
   })
   if (response.error) {
-    logger.debug('refreshing token failed')
+    logger.debug('refreshing token failed. clear session data')
+    await clearSessionData()
     return null
   }
   logger.debug('refresh token success')
@@ -57,7 +65,8 @@ async function refreshToken(): Promise<UserToken | null> {
     },
   })
   if (userResponse.error) {
-    logger.debug('get user failed')
+    logger.debug('get user failed. clear session data')
+    await clearSessionData()
     return null
   }
   logger.debug('user obtained')

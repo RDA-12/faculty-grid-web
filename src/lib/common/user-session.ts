@@ -20,14 +20,20 @@ type SessionData = {
   userId: string
 }
 
-export async function setSession(token: UserToken, user: User): Promise<void> {
-  const logger = getLogger('setSession')
-
-  logger.debug('get session from iron-session')
+async function getMyIronSession() {
   const session = await getIronSession<SessionData>(await cookies(), {
     cookieName: 'session',
     password: process.env.SESSION_PASSWORD!,
   })
+
+  return session
+}
+
+export async function setSession(token: UserToken, user: User): Promise<void> {
+  const logger = getLogger('setSession')
+
+  logger.debug('get session from iron-session')
+  const session = await getMyIronSession()
   logger.debug('set session')
   session.accessToken = token.accessToken
   session.refreshToken = token.refreshToken
@@ -40,10 +46,7 @@ export async function getUserId(): Promise<string | null> {
   const logger = getLogger('getSession')
 
   logger.debug('get session from iron-session')
-  const session = await getIronSession<SessionData>(await cookies(), {
-    cookieName: 'session',
-    password: process.env.SESSION_PASSWORD!,
-  })
+  const session = await getMyIronSession()
   logger.debug('session obtained')
   if (session.userId) {
     logger.debug('user exists')
@@ -54,10 +57,12 @@ export async function getUserId(): Promise<string | null> {
 }
 
 export async function getSessionData(): Promise<Partial<SessionData>> {
-  const session = await getIronSession<SessionData>(await cookies(), {
-    cookieName: 'session',
-    password: process.env.SESSION_PASSWORD!,
-  })
+  const session = await getMyIronSession()
 
   return session
+}
+
+export async function clearSessionData(): Promise<void> {
+  const session = await getMyIronSession()
+  session.destroy()
 }
