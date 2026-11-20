@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { Button } from '../ui/button'
 import {
   Field,
@@ -12,12 +12,23 @@ import {
 import { Input } from '../ui/input'
 import { loginAction } from '@/lib/auth/auth.action'
 import { Spinner } from '../ui/spinner'
+import { toast } from 'sonner'
 
 /**
  * Creates a FieldSet consists of email and password Field
  */
 export default function LoginForm() {
   const [state, action, isPending] = useActionState(loginAction, {})
+
+  useEffect(() => {
+    if (state.error) {
+      toast.error(state.error.title, {
+        description: state.error.detail,
+        position: 'top-center',
+        duration: Infinity,
+      })
+    }
+  }, [state.error])
 
   return (
     <FieldSet>
