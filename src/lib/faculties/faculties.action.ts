@@ -48,6 +48,10 @@ export async function createFacultyAction(
 
   if (response.error) {
     logger.debug('create faculty failed')
+    if (response.error.status === 401) {
+      logger.debug('failed due to token expired. redirect to login')
+      redirect('/login')
+    }
     return {
       error: response.error,
     }

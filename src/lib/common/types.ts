@@ -19,6 +19,8 @@ export function parseZodError<T>(error: z.ZodError<T>): InvalidRequestError<T> {
 }
 
 type ResponseError = {
+  /** HTTP status code */
+  status: number
   title: string
   detail: string
 }
