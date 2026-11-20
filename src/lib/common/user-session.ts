@@ -52,3 +52,12 @@ export async function getUserId(): Promise<string | null> {
   logger.debug('user not exists')
   return null
 }
+
+export async function getSessionData(): Promise<Partial<SessionData>> {
+  const session = await getIronSession<SessionData>(await cookies(), {
+    cookieName: 'session',
+    password: process.env.SESSION_PASSWORD!,
+  })
+
+  return session
+}

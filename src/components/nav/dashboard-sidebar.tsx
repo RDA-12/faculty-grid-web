@@ -10,14 +10,14 @@ import type { Route } from 'next'
 
 export function DashboardSidebar() {
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-sidebar">
       <CardHeader>
         <CardTitle>FacultyGrid</CardTitle>
         <CardDescription>Sistem administrasi kampus</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4">
-          <NavItem href="/dashboard/faculties/create" label="Fakultas" />
+          <NavItem href="/dashboard/faculties" label="Fakultas" />
         </div>
       </CardContent>
     </Card>
