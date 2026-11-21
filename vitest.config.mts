@@ -9,7 +9,7 @@ export default defineConfig({
     environment: 'jsdom',
     root: './',
     include: ['**/*.spec{.tsx,.ts}'],
-    setupFiles: ['./rtl.vitest.setup.ts', './msw.vitest.setup.ts'],
+    setupFiles: ['./rtl.vitest.setup.ts'],
     env: {
       NEXT_PUBLIC_API_URL: 'http://localhost:8000',
     },

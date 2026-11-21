@@ -31,7 +31,7 @@ export async function loginAction(
   if (result.error) {
     logger.debug('failed to log in')
     return {
-      error: result.error,
+      error: { status: result.status, ...result.error },
     }
   }
   logger.debug('login succes')
@@ -44,7 +44,7 @@ export async function loginAction(
   if (userResult.error) {
     logger.debug('failed to get user data')
     return {
-      error: userResult.error,
+      error: { status: result.status, ...userResult.error },
     }
   }
   logger.debug('user data obtained')

@@ -24,10 +24,7 @@ export async function createFacultyAction(
   })
   if (!parsedResult.success) {
     logger.debug('parse failed')
-    return {
-      status: 422,
-      ...parseZodError(parsedResult.error),
-    }
+    return parseZodError(parsedResult.error)
   }
   logger.debug('request parsed')
   const data = parsedResult.data
@@ -56,13 +53,11 @@ export async function createFacultyAction(
       redirect('/login')
     }
     return {
-      status: response.status,
-      error: response.error,
+      error: { status: response.status, ...response.error },
     }
   }
   logger.debug('faculty created')
   return {
-    status: response.status,
     data: response.data,
   }
 }
