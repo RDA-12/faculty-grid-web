@@ -10,13 +10,13 @@ import {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 type HTTPError = {
-  status: number
   title: string
   detail: string
   errors?: unknown
 }
 
-type HTTPResponse<T> = {
+export type HTTPResponse<T> = {
+  status: number
   error?: HTTPError
   data?: T
 }
@@ -101,12 +101,14 @@ async function retryRequest<T>(
   if (!response.ok) {
     logger.debug(`request failed. server respond with ${response.status}`)
     return {
+      status: response.status,
       error: json,
     }
   }
 
   logger.debug(`request success`)
   return {
+    status: response.status,
     data: json,
   }
 }
@@ -139,6 +141,7 @@ async function post<T>(
   const jsonResponse = await response.json()
   if (!response.ok) {
     const errorToReturn = {
+      status: response.status,
       error: jsonResponse,
     }
     logger.debug('respond failed')
@@ -159,6 +162,7 @@ async function post<T>(
 
   logger.debug('respond success')
   return {
+    status: response.status,
     data: jsonResponse.data as T,
   }
 }
@@ -180,6 +184,7 @@ async function get<T>(
   const jsonResponse = await response.json()
   if (!response.ok) {
     const errorToReturn = {
+      status: response.status,
       error: jsonResponse,
     }
     logger.debug('respond failed')
@@ -200,6 +205,7 @@ async function get<T>(
 
   logger.debug('respond success')
   return {
+    status: response.status,
     data: jsonResponse.data,
   }
 }

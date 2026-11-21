@@ -10,7 +10,12 @@
     "type-gen": "next typegen",
     "format": "prettier --write */**/*{.ts,.tsx}",
     "format:check": "prettier --check */**/*{.ts,.tsx}",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "test:debug": "vitest --inspect-brk --no-file-parallelism",
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.5",
@@ -32,14 +37,22 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^8.0.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.13",
     "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/coverage-v8": "^5.1.1",
     "babel-plugin-react-compiler": "1.0.0",
     "husky": "^9.1.7",
+    "jsdom": "^31.0.1",
     "oxlint": "^1.94.0",
     "oxlint-tsgolint": "^7.0.2007",
     "prettier": "3.10.1",
-    "typescript": "^7"
+    "typescript": "^7",
+    "vitest": "^5.1.1"
   }
 }
