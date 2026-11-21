@@ -8,5 +8,8 @@
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "js/ts.preferences.autoImportSpecifierExcludeRegexes": [
+    "^node:test$"
+  ],
 }

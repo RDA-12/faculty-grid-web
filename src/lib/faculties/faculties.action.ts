@@ -24,7 +24,10 @@ export async function createFacultyAction(
   })
   if (!parsedResult.success) {
     logger.debug('parse failed')
-    return parseZodError(parsedResult.error)
+    return {
+      status: 422,
+      ...parseZodError(parsedResult.error),
+    }
   }
   logger.debug('request parsed')
   const data = parsedResult.data
@@ -48,16 +51,18 @@ export async function createFacultyAction(
 
   if (response.error) {
     logger.debug('create faculty failed')
-    if (response.error.status === 401) {
+    if (response.status === 401) {
       logger.debug('failed due to token expired. redirect to login')
       redirect('/login')
     }
     return {
+      status: response.status,
       error: response.error,
     }
   }
   logger.debug('faculty created')
   return {
+    status: response.status,
     data: response.data,
   }
 }

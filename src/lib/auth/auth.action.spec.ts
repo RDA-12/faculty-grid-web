@@ -4,6 +4,7 @@ import { getAuthResponse } from '../../../test/mock/http-response/auth.response'
 import httpClient from '../common/http-client'
 import { setSession } from '../common/user-session'
 import { getUserResponse } from '../../../test/mock/http-response/user.response'
+import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('../common/user-session', () => ({
   setSession: vi.fn().mockImplementation(() => {}),
