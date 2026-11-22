@@ -55,8 +55,19 @@ describe('FacultiesAction', () => {
       expect(redirect).toHaveBeenCalledExactlyOnceWith('/login')
     })
 
-    it('should return error when /faculties failed', async () => {
+    it('should redirect to login when /faculties failed with 401', async () => {
       const response = getFacultyResponse('/faculties', 'POST', 401)
+      vi.mocked(httpClient.post).mockImplementationOnce(async () => {
+        return response
+      })
+
+      await createFacultyAction({}, createRequest)
+
+      expect(redirect).toHaveBeenCalledExactlyOnceWith('/login')
+    })
+
+    it('should return error when /faculties failed', async () => {
+      const response = getFacultyResponse('/faculties', 'POST', 500)
       vi.mocked(httpClient.post).mockImplementationOnce(async () => {
         return response
       })
