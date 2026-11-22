@@ -38,12 +38,17 @@ export default function FacultyForm() {
   }, [state.error, state.data])
 
   return (
-    <FieldSet>
+    <FieldSet data-testid="FacultyForm">
       <form action={action}>
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="name">Nama Fakultas</FieldLabel>
-            <Input id="name" name="name" aria-invalid={!!state.errors?.name} />
+            <Input
+              id="name"
+              name="name"
+              aria-invalid={!!state.errors?.name}
+              placeholder="Fakultas Teknik"
+            />
             {state.errors?.name && <FieldError>{state.errors.name}</FieldError>}
           </Field>
           <Field>

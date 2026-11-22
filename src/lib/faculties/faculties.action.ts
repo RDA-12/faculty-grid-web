@@ -6,11 +6,7 @@ import { ActionState, parseZodError } from '../common/types'
 import { getSessionData } from '../common/user-session'
 import { CreateFacultyRequest, CreateFacultySchema } from './faculties.schema'
 import httpClient from '../common/http-client'
-
-type Faculty = {
-  id: string
-  name: string
-}
+import { Faculty } from './faculty.types'
 
 export async function createFacultyAction(
   _state: ActionState<CreateFacultyRequest, Faculty>,
