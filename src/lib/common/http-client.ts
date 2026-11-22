@@ -1,9 +1,9 @@
 import { getLogger } from './logger'
+import { Pagination, PaginationResult } from './pagination'
 import {
   clearSessionData,
   getSessionData,
   setSession,
-  User,
   UserToken,
 } from './user-session'
 
@@ -19,6 +19,13 @@ export type HTTPResponse<T> = {
   status: number
   error?: HTTPError
   data?: T
+}
+
+export type PaginatedHTTPResponse<T> = {
+  status: number
+  error?: HTTPError
+  data?: T[]
+  pagination?: PaginationResult
 }
 
 type HTTPOptions = {
@@ -45,32 +52,37 @@ async function refreshToken(): Promise<UserToken | null> {
   }
 
   logger.debug('refreshToken exists. start refreshing token')
-  const response = await post<UserToken>(refreshEndpoint, {
-    json: {
-      refreshToken: session.refreshToken,
+  const response = await fetch(apiUrl + refreshEndpoint, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
     },
+    body: JSON.stringify({
+      refreshToken: session.refreshToken,
+    }),
   })
-  if (response.error) {
+  if (!response.ok) {
     logger.debug('refreshing token failed. clear session data')
     await clearSessionData()
     return null
   }
   logger.debug('refresh token success')
-  const data = response.data!
+  const data = (await response.json()).data
 
   logger.debug('start get user')
-  const userResponse = await get<User>('/users/me', {
+  const userResponse = await fetch(apiUrl + '/users/me', {
+    method: 'GET',
     headers: {
       Authorization: `bearer ${data.accessToken}`,
     },
   })
-  if (userResponse.error) {
+  if (!userResponse) {
     logger.debug('get user failed. clear session data')
     await clearSessionData()
     return null
   }
   logger.debug('user obtained')
-  const user = userResponse.data!
+  const user = (await userResponse.json()).data!
 
   logger.debug('start save new session')
   await setSession(data, user)
@@ -167,11 +179,25 @@ async function post<T>(
   }
 }
 
+function get<T>(
+  endpoint: string,
+  options: Omit<HTTPOptions, 'json'>,
+): Promise<HTTPResponse<T>>
+function get<T>(
+  endpoint: string,
+  options: Omit<HTTPOptions, 'json'>,
+  params: Pagination,
+): Promise<PaginatedHTTPResponse<T>>
 async function get<T>(
   endpoint: string,
   options: Omit<HTTPOptions, 'json'> = {},
+  params?: Pagination,
 ): Promise<HTTPResponse<T>> {
   const logger = getLogger('httpClient.get')
+  if (params) {
+    logger.debug('apply query params')
+    endpoint = `${endpoint}?${new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]))}`
+  }
 
   const requestInit: RequestInit = {
     ...options,
@@ -210,9 +236,6 @@ async function get<T>(
   }
 }
 
-const httpClient = {
-  post: post,
-  get: get,
-}
+const httpClient = { post, get }
 
 export default httpClient
