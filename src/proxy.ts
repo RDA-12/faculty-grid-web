@@ -6,10 +6,12 @@ const publicRoutes: string[] = ['/login', '/']
 
 export default async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname
-  const isProtectedRoute = protectedRoutes.includes(path)
+  const isProtectedRoute =
+    protectedRoutes.filter((it) => path.startsWith(it)).length > 0
   const isPublicRoute = publicRoutes.includes(path)
 
-  const authenticated = (await getSessionData()).accessToken !== null
+  const session = await getSessionData()
+  const authenticated = typeof session.accessToken !== 'undefined'
 
   if (path === '/') {
     if (authenticated) {
