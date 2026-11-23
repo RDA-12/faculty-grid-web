@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserId } from './lib/common/user-session'
+import { getSessionData } from './lib/common/user-session'
 
 const protectedRoutes: string[] = ['/dashboard']
 const publicRoutes: string[] = ['/login', '/']
@@ -9,7 +9,7 @@ export default async function proxy(req: NextRequest) {
   const isProtectedRoute = protectedRoutes.includes(path)
   const isPublicRoute = publicRoutes.includes(path)
 
-  const authenticated = (await getUserId()) !== null
+  const authenticated = (await getSessionData()).accessToken !== null
 
   if (path === '/') {
     if (authenticated) {

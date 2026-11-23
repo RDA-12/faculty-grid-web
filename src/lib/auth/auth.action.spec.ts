@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { loginAction } from './auth.action'
 import { getAuthResponse } from '../../../test/mock/http-response/auth.response'
 import { setSession } from '../common/user-session'
-import { getUserResponse } from '../../../test/mock/http-response/user.response'
 import { describe, expect, it, vi } from 'vitest'
 import httpClient from '../common/http-client'
 
@@ -13,9 +12,6 @@ vi.mock('../common/http-client', () => ({
   default: {
     post: vi.fn().mockImplementation(() => {
       return getAuthResponse('/auth/login', 'POST', 200)
-    }),
-    get: vi.fn().mockImplementation(() => {
-      return getUserResponse('/users/me', 'GET', 200)
     }),
   },
 }))
@@ -56,25 +52,11 @@ describe('AuthAction', () => {
       })
     })
 
-    it('should return error when get user failed', async () => {
-      const response = getUserResponse('/users/me', 'GET', 500)!
-      vi.mocked(httpClient.post).mockImplementationOnce(async () => {
-        return response
-      })
-
-      const result = await loginAction({}, loginRequest)
-
-      expect(result).toMatchObject({
-        error: response.error,
-      })
-    })
-
     it('should set correct session when success', async () => {
       await loginAction({}, loginRequest)
 
       expect(setSession).toHaveBeenCalledExactlyOnceWith(
         getAuthResponse('/auth/login', 'POST', 200)?.data,
-        getUserResponse('/users/me', 'GET', 200)?.data,
       )
     })
 

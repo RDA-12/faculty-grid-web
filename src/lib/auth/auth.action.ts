@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { ActionState, parseZodError } from '../common/types'
 import { LoginRequest, LoginSchema } from './auth.schema'
 import { getLogger } from '../common/logger'
-import { setSession, User, UserToken } from '../common/user-session'
+import { setSession, UserToken } from '../common/user-session'
 import httpClient from '../common/http-client'
 
 export async function loginAction(
@@ -37,21 +37,8 @@ export async function loginAction(
   logger.debug('login succes')
   const userToken = result.data!
 
-  logger.debug('start getting user data')
-  const userResult = await httpClient.get<User>('/users/me', {
-    headers: { Authorization: `Bearer ${userToken.accessToken}` },
-  })
-  if (userResult.error) {
-    logger.debug('failed to get user data')
-    return {
-      error: { status: result.status, ...userResult.error },
-    }
-  }
-  logger.debug('user data obtained')
-  const user = userResult.data!
-
   logger.debug('start saving session')
-  await setSession(userToken, user)
+  await setSession(userToken)
   logger.debug('session saved, redirect user to home')
   redirect('/')
 }
