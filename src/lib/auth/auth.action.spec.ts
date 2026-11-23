@@ -12,10 +12,10 @@ vi.mock('../common/user-session', () => ({
 vi.mock('../common/http-client', () => ({
   default: {
     post: vi.fn().mockImplementation(() => {
-      return getAuthResponse('/auth/login', 200)
+      return getAuthResponse('/auth/login', 'POST', 200)
     }),
     get: vi.fn().mockImplementation(() => {
-      return getUserResponse('/users/me', 200)
+      return getUserResponse('/users/me', 'GET', 200)
     }),
   },
 }))
@@ -44,7 +44,7 @@ describe('AuthAction', () => {
     })
 
     it('should return error when login failed', async () => {
-      const response = getAuthResponse('/auth/login', 401)!
+      const response = getAuthResponse('/auth/login', 'POST', 401)!
       vi.mocked(httpClient.post).mockImplementationOnce(async () => {
         return response
       })
@@ -57,7 +57,7 @@ describe('AuthAction', () => {
     })
 
     it('should return error when get user failed', async () => {
-      const response = getUserResponse('/users/me', 500)!
+      const response = getUserResponse('/users/me', 'GET', 500)!
       vi.mocked(httpClient.post).mockImplementationOnce(async () => {
         return response
       })
@@ -73,8 +73,8 @@ describe('AuthAction', () => {
       await loginAction({}, loginRequest)
 
       expect(setSession).toHaveBeenCalledExactlyOnceWith(
-        getAuthResponse('/auth/login', 200)?.data,
-        getUserResponse('/users/me', 200)?.data,
+        getAuthResponse('/auth/login', 'POST', 200)?.data,
+        getUserResponse('/users/me', 'GET', 200)?.data,
       )
     })
 
