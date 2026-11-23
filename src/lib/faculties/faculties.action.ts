@@ -5,9 +5,9 @@ import { getLogger } from '../common/logger'
 import { ActionState, parseZodError } from '../common/types'
 import { getSessionData } from '../common/user-session'
 import { CreateFacultyRequest, CreateFacultySchema } from './faculties.schema'
-import httpClient from '../common/http-client'
 import { Faculty } from './faculty.types'
 import { PaginatedData } from '../common/pagination'
+import httpClient from '../common/http-client'
 
 export async function createFacultyAction(
   _state: ActionState<CreateFacultyRequest, Faculty>,

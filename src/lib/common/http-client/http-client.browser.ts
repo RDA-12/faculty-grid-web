@@ -1,31 +1,12 @@
-import { getLogger } from './logger'
-import { Pagination, PaginationResult } from './pagination'
+import { getLogger } from '../logger'
+import { Pagination } from '../pagination'
+import type {
+  HTTPOptions,
+  HTTPResponse,
+  PaginatedHTTPResponse,
+} from './common.http-client'
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
-
-type HTTPError = {
-  title: string
-  detail: string
-  errors?: unknown
-}
-
-export type HTTPResponse<T> = {
-  status: number
-  error?: HTTPError
-  data?: T
-}
-
-export type PaginatedHTTPResponse<T> = {
-  status: number
-  error?: HTTPError
-  data?: T[]
-  pagination?: PaginationResult
-}
-
-type HTTPOptions = {
-  json?: unknown
-  headers?: Record<string, any>
-} & Omit<RequestInit, 'method' | 'body' | 'headers'>
+const proxyPrefix = process.env.NEXT_PUBLIC_SITE_URL + '/api/proxy'
 
 async function post<T>(
   endpoint: string,
@@ -49,7 +30,7 @@ async function post<T>(
   }
 
   logger.debug('start making request')
-  const response = await fetch(apiUrl + endpoint, requestInit)
+  const response = await fetch(proxyPrefix + endpoint, requestInit)
 
   logger.debug('request finished. parse response body')
   const jsonResponse = await response.json()
@@ -82,7 +63,7 @@ async function get<T>(
     method: 'GET',
   }
   logger.debug('start making the request')
-  const response = await fetch(apiUrl + endpoint, requestInit)
+  const response = await fetch(proxyPrefix + endpoint, requestInit)
 
   logger.debug('request finished. parse response body')
   const jsonResponse = await response.json()
@@ -91,8 +72,7 @@ async function get<T>(
 }
 
 /**
- * Focus primarily to make request to backend. Prefixing all endpoint with
- * backend url set in env
+ * Focus primarily to make request to internal nextjs proxy route handlers
  */
 const httpClient = { post, get }
 

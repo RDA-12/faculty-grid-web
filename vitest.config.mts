@@ -13,7 +13,8 @@ export default defineConfig({
     include: ['**/*.spec{.tsx,.ts}'],
     setupFiles: ['./rtl.vitest.setup.ts'],
     env: {
-      NEXT_PUBLIC_API_URL: 'http://localhost:8000',
+      BACKEND_API_URL: 'http://localhost:8000',
+      NEXT_PUBLIC_SITE_URL: 'http://localhost:3000',
     },
   },
 })

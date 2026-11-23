@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation'
-import httpClient from '../common/http-client'
 import { getSessionData } from '../common/user-session'
 import { describe, expect, it, vi } from 'vitest'
 import { createFacultyAction, getFacultiesAction } from './faculties.action'
 import { getFacultyResponse } from '../../../test/mock/http-response/faculty.response'
 import type { PaginatedData } from '../common/pagination'
 import type { Faculty } from './faculty.types'
+import httpClient from '../common/http-client'
 
 vi.mock('../common/user-session', () => ({
   getSessionData: vi.fn().mockImplementation(() => ({

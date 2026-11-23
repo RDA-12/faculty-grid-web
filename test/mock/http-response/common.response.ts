@@ -1,4 +1,7 @@
-import { HTTPResponse, PaginatedHTTPResponse } from '@/lib/common/http-client'
+import type {
+  HTTPResponse,
+  PaginatedHTTPResponse,
+} from '@/lib/common/http-client/common.http-client'
 
 export type HTTPStatus = 200 | 201 | 401 | 403 | 422 | 500
 

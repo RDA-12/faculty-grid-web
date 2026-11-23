@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import httpClient from './http-client'
+import httpClient from './http-client.server'
 
 describe('httpClient', () => {
   const mockResponse = {
@@ -22,7 +22,7 @@ describe('httpClient', () => {
   })
 
   describe('post', () => {
-    it('should do correct fetch request to backend url', async () => {
+    it('should do correct fetch request to backend proxy url', async () => {
       await httpClient.post('/external', {
         headers: { Authorization: 'Bearer accessToken' },
         json: {
@@ -31,7 +31,7 @@ describe('httpClient', () => {
       })
 
       expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        process.env.NEXT_PUBLIC_API_URL + '/external',
+        'http://localhost:8000/external',
         {
           headers: {
             Authorization: 'Bearer accessToken',
@@ -59,7 +59,7 @@ describe('httpClient', () => {
       })
 
       expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        process.env.NEXT_PUBLIC_API_URL + '/external',
+        'http://localhost:8000/external',
         {
           headers: {
             Authorization: 'Bearer accessToken',
@@ -79,7 +79,7 @@ describe('httpClient', () => {
       )
 
       expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        process.env.NEXT_PUBLIC_API_URL + '/external?page=1&pageSize=100',
+        'http://localhost:8000/external?page=1&pageSize=100',
         {
           headers: {
             Authorization: 'Bearer accessToken',

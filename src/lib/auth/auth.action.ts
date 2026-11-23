@@ -4,8 +4,8 @@ import { redirect } from 'next/navigation'
 import { ActionState, parseZodError } from '../common/types'
 import { LoginRequest, LoginSchema } from './auth.schema'
 import { getLogger } from '../common/logger'
-import httpClient from '../common/http-client'
 import { setSession, User, UserToken } from '../common/user-session'
+import httpClient from '../common/http-client'
 
 export async function loginAction(
   _state: ActionState<LoginRequest, null>,
