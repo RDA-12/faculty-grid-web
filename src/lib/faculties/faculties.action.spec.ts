@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { getSessionData } from '../common/user-session'
 import { describe, expect, it, vi } from 'vitest'
 import { createFacultyAction, getFacultiesAction } from './faculties.action'
 import { getFacultyResponse } from '../../../test/mock/http-response/faculty.response'
@@ -7,11 +6,6 @@ import type { PaginatedData } from '../common/pagination'
 import type { Faculty } from './faculty.types'
 import httpClient from '../common/http-client'
 
-vi.mock('../common/user-session', () => ({
-  getSessionData: vi.fn().mockImplementation(() => ({
-    accessToken: 'Access Token',
-  })),
-}))
 vi.mock('../common/http-client', () => ({
   default: {
     post: vi.fn().mockImplementation(() => {
@@ -50,14 +44,6 @@ describe('FacultiesAction', () => {
           name: 'Form tidak valid',
         },
       })
-    })
-
-    it('should redirect to login when session is empty', async () => {
-      vi.mocked(getSessionData).mockImplementationOnce(async () => ({}))
-
-      await createFacultyAction({}, createRequest)
-
-      expect(redirect).toHaveBeenCalledExactlyOnceWith('/login')
     })
 
     it('should redirect to logout when /faculties failed with 401', async () => {
@@ -99,22 +85,11 @@ describe('FacultiesAction', () => {
         json: {
           name: createRequest.get('name'),
         },
-        headers: {
-          Authorization: 'Bearer Access Token',
-        },
       })
     })
   })
 
   describe('getFacultiesAction', () => {
-    it('should redirect to login when session is empty', async () => {
-      vi.mocked(getSessionData).mockImplementationOnce(async () => ({}))
-
-      await getFacultiesAction({})
-
-      expect(redirect).toHaveBeenCalledExactlyOnceWith('/login')
-    })
-
     it('should redirect to logout when /faculties failed with 401', async () => {
       const response = getFacultyResponse('/faculties', 'GET', 401)
       vi.mocked(httpClient.get).mockImplementationOnce(async () => {
@@ -166,11 +141,7 @@ describe('FacultiesAction', () => {
 
       expect(httpClient.get).toHaveBeenCalledExactlyOnceWith(
         '/faculties',
-        {
-          headers: {
-            Authorization: 'bearer Access Token',
-          },
-        },
+        {},
         {
           page: 1,
           pageSize: 10,

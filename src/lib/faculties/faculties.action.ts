@@ -3,7 +3,6 @@
 import { redirect } from 'next/navigation'
 import { getLogger } from '../common/logger'
 import { ActionState, parseZodError } from '../common/types'
-import { getSessionData } from '../common/user-session'
 import { CreateFacultyRequest, CreateFacultySchema } from './faculties.schema'
 import { Faculty } from './faculty.types'
 import { PaginatedData } from '../common/pagination'
@@ -26,21 +25,9 @@ export async function createFacultyAction(
   logger.debug('request parsed')
   const data = parsedResult.data
 
-  logger.debug('get current session')
-  const session = await getSessionData()
-  logger.debug('session obtained')
-
-  if (!session.accessToken) {
-    logger.debug('no access token. redirect to login')
-    redirect('/login')
-  }
-
   logger.debug('start creating new faculty')
   const response = await httpClient.post<Faculty>('/faculties', {
     json: data,
-    headers: {
-      Authorization: `Bearer ${session.accessToken}`,
-    },
   })
 
   if (response.error) {
@@ -66,20 +53,10 @@ export async function getFacultiesAction(
 ): Promise<GetFacultiesActionResult> {
   const logger = getLogger('getFacultiesAction')
 
-  logger.debug('get current session')
-  const session = await getSessionData()
-  if (!session.accessToken) {
-    logger.debug('user not authenticated. redirect to login')
-    redirect('/login')
-  }
-  logger.debug('user authenticated. start get faculties')
+  logger.debug('start get faculties')
   const response = await httpClient.get<Faculty>(
     '/faculties',
-    {
-      headers: {
-        Authorization: `bearer ${session.accessToken}`,
-      },
-    },
+    {},
     {
       page: 1,
       pageSize: 10,
