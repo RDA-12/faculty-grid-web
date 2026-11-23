@@ -27,7 +27,7 @@ export type HTTPOptions = {
 
 export function createHttpClient(
   baseUrl: string,
-  interceptor?: () => Promise<HTTPOptions>,
+  optionsBuilder?: () => Promise<HTTPOptions>,
 ) {
   /**
    * Make post request to endpoint with options.
@@ -45,14 +45,16 @@ export function createHttpClient(
       headers instanceof Array
         ? Object.fromEntries(headers)
         : (headers as Record<string, string>)
-    const interceptorRequestInit = interceptor ? await interceptor() : {}
+    const optionsBuilderRequestInit = optionsBuilder
+      ? await optionsBuilder()
+      : {}
     const requestInit: RequestInit = {
       ...rest,
-      ...interceptorRequestInit,
+      ...optionsBuilderRequestInit,
       method: 'POST',
       headers: {
         ...effectiveHeaders,
-        ...interceptorRequestInit.headers,
+        ...optionsBuilderRequestInit.headers,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(json),
@@ -98,10 +100,12 @@ export function createHttpClient(
       endpoint = `${endpoint}?${new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]))}`
     }
 
-    const interceptorRequestInit = interceptor ? await interceptor() : {}
+    const optionsBuilderRequestInit = optionsBuilder
+      ? await optionsBuilder()
+      : {}
     const requestInit: RequestInit = {
       ...options,
-      ...interceptorRequestInit,
+      ...optionsBuilderRequestInit,
       method: 'GET',
     }
     logger.debug('start making the request')
