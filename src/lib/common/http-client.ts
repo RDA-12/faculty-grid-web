@@ -1,11 +1,6 @@
 import { getLogger } from './logger'
 import { Pagination, PaginationResult } from './pagination'
-import {
-  clearSessionData,
-  getSessionData,
-  setSession,
-  UserToken,
-} from './user-session'
+import { getSessionData, setSession, UserToken } from './user-session'
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
@@ -46,8 +41,7 @@ async function refreshToken(): Promise<UserToken | null> {
   const session = await getSessionData()
 
   if (!session.refreshToken) {
-    logger.debug('refreshToken not exists. clear session data')
-    await clearSessionData()
+    logger.debug('refreshToken not exists')
     return null
   }
 
@@ -62,8 +56,7 @@ async function refreshToken(): Promise<UserToken | null> {
     }),
   })
   if (!response.ok) {
-    logger.debug('refreshing token failed. clear session data')
-    await clearSessionData()
+    logger.debug('refreshing token failed')
     return null
   }
   logger.debug('refresh token success')
@@ -77,8 +70,7 @@ async function refreshToken(): Promise<UserToken | null> {
     },
   })
   if (!userResponse) {
-    logger.debug('get user failed. clear session data')
-    await clearSessionData()
+    logger.debug('get user failed')
     return null
   }
   logger.debug('user obtained')
