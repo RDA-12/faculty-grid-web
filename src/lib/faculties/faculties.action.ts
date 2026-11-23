@@ -5,7 +5,6 @@ import { getLogger } from '../common/logger'
 import { ActionState, parseZodError } from '../common/types'
 import { CreateFacultyRequest, CreateFacultySchema } from './faculties.schema'
 import { Faculty } from './faculty.types'
-import { PaginatedData } from '../common/pagination'
 import httpClient from '../common/http-client'
 
 export async function createFacultyAction(
@@ -43,40 +42,5 @@ export async function createFacultyAction(
   logger.debug('faculty created')
   return {
     data: response.data,
-  }
-}
-
-export type GetFacultiesActionResult = ActionState<null, PaginatedData<Faculty>>
-
-export async function getFacultiesAction(
-  _state: GetFacultiesActionResult,
-): Promise<GetFacultiesActionResult> {
-  const logger = getLogger('getFacultiesAction')
-
-  logger.debug('start get faculties')
-  const response = await httpClient.get<Faculty>(
-    '/faculties',
-    {},
-    {
-      page: 1,
-      pageSize: 10,
-    },
-  )
-  if (response.error) {
-    if (response.status === 401) {
-      logger.debug('failed due to expired/invalid token. redirect to logout')
-      redirect('/api/auth/logout')
-    }
-    logger.debug('get faculties failed')
-    return {
-      error: {
-        status: response.status,
-        ...response.error,
-      },
-    }
-  }
-  logger.debug('get faculties success')
-  return {
-    data: { data: response.data ?? [], pagination: response.pagination! },
   }
 }

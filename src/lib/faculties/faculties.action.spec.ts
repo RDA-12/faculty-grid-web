@@ -1,18 +1,13 @@
 import { redirect } from 'next/navigation'
 import { describe, expect, it, vi } from 'vitest'
-import { createFacultyAction, getFacultiesAction } from './faculties.action'
+import { createFacultyAction } from './faculties.action'
 import { getFacultyResponse } from '../../../test/mock/http-response/faculty.response'
-import type { PaginatedData } from '../common/pagination'
-import type { Faculty } from './faculty.types'
 import httpClient from '../common/http-client'
 
 vi.mock('../common/http-client', () => ({
   default: {
     post: vi.fn().mockImplementation(() => {
       return getFacultyResponse('/faculties', 'POST', 200)
-    }),
-    get: vi.fn().mockImplementation(() => {
-      return getFacultyResponse('/faculties', 'GET', 200)
     }),
   },
 }))
@@ -86,67 +81,6 @@ describe('FacultiesAction', () => {
           name: createRequest.get('name'),
         },
       })
-    })
-  })
-
-  describe('getFacultiesAction', () => {
-    it('should redirect to logout when /faculties failed with 401', async () => {
-      const response = getFacultyResponse('/faculties', 'GET', 401)
-      vi.mocked(httpClient.get).mockImplementationOnce(async () => {
-        return {
-          status: response.status,
-          error: response.error,
-        }
-      })
-
-      await getFacultiesAction({})
-
-      expect(redirect).toHaveBeenCalledExactlyOnceWith('/api/auth/logout')
-    })
-
-    it('should return error when /faculties failed', async () => {
-      const response = getFacultyResponse('/faculties', 'GET', 500)
-      vi.mocked(httpClient.get).mockImplementationOnce(async () => {
-        return {
-          status: response.status,
-          error: response.error,
-        }
-      })
-
-      const result = await getFacultiesAction({})
-
-      expect(result).toMatchObject({
-        error: response.error,
-      })
-    })
-
-    it('should return correct faculties when /faculties success', async () => {
-      const result = await getFacultiesAction({})
-
-      const expected = getFacultyResponse(
-        '/faculties',
-        'GET',
-        200,
-      ) as PaginatedData<Faculty>
-      expect(result).toMatchObject({
-        data: {
-          data: expected.data,
-          pagination: expected.pagination,
-        },
-      })
-    })
-
-    it('should call correct endpoint and params', async () => {
-      await getFacultiesAction({})
-
-      expect(httpClient.get).toHaveBeenCalledExactlyOnceWith(
-        '/faculties',
-        {},
-        {
-          page: 1,
-          pageSize: 10,
-        },
-      )
     })
   })
 })

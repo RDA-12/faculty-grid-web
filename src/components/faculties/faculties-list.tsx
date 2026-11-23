@@ -1,9 +1,9 @@
 'use client'
 
 import {
-  getFacultiesAction,
-  type GetFacultiesActionResult,
-} from '@/lib/faculties/faculties.action'
+  getFacultiesQuery,
+  type getFacultiesQueryResult,
+} from '@/lib/faculties/faculties.query'
 import { startTransition, useActionState } from 'react'
 import FacultiesTable from './faculties-table'
 import { Spinner } from '../ui/spinner'
@@ -19,12 +19,12 @@ import { CircleX } from 'lucide-react'
 import { Button } from '../ui/button'
 
 type FacultiesListProps = {
-  initial?: GetFacultiesActionResult
+  initial?: getFacultiesQueryResult
 }
 
 export default function FacultiesList({ initial }: FacultiesListProps) {
   const [state, action, isPending] = useActionState(
-    getFacultiesAction,
+    getFacultiesQuery,
     initial ?? {},
   )
 

@@ -4,13 +4,13 @@ import FacultiesList from './faculties-list'
 import type { PaginatedData } from '@/lib/common/pagination'
 import type { Faculty } from '@/lib/faculties/faculty.types'
 import {
-  getFacultiesAction,
-  type GetFacultiesActionResult,
-} from '@/lib/faculties/faculties.action'
+  getFacultiesQuery,
+  type getFacultiesQueryResult,
+} from '@/lib/faculties/faculties.query'
 import { internalError } from '../../../test/mock/http-response/common.response'
 
-vi.mock('@/lib/faculties/faculties.action', () => ({
-  getFacultiesAction: vi.fn(),
+vi.mock('@/lib/faculties/faculties.query', () => ({
+  getFacultiesQuery: vi.fn(),
 }))
 
 describe('FacultiesList', () => {
@@ -27,18 +27,18 @@ describe('FacultiesList', () => {
       total: 10,
     },
   }
-  const initial: GetFacultiesActionResult = {
+  const initial: getFacultiesQueryResult = {
     data: initialData,
   }
 
   describe('Render', () => {
-    it('should shows FacultiesTable when getFacultiesAction is success', () => {
+    it('should shows FacultiesTable when getFacultiesQuery is success', () => {
       render(<FacultiesList initial={initial} />)
 
       expect(screen.getByTestId('FacultiesTable')).toBeVisible()
     })
 
-    it('should error text when getFacultiesAction is failed', () => {
+    it('should error text when getFacultiesQuery is failed', () => {
       render(
         <FacultiesList
           initial={{
@@ -56,9 +56,9 @@ describe('FacultiesList', () => {
       expect(screen.getByRole('button', { name: /coba lagi/i })).toBeVisible()
     })
 
-    it('should show spinner when getFacultiesAction is pending', async () => {
-      let resolveAction!: (v: GetFacultiesActionResult) => void
-      vi.mocked(getFacultiesAction).mockImplementation(
+    it('should show spinner when getFacultiesQuery is pending', async () => {
+      let resolveAction!: (v: getFacultiesQueryResult) => void
+      vi.mocked(getFacultiesQuery).mockImplementation(
         () =>
           new Promise((r) => {
             resolveAction = r
@@ -91,7 +91,7 @@ describe('FacultiesList', () => {
   })
 
   describe('Interactions', () => {
-    it('allows try again to load getFacultiesAction', async () => {
+    it('allows try again to load getFacultiesQuery', async () => {
       const { user } = render(
         <FacultiesList
           initial={{
@@ -108,7 +108,7 @@ describe('FacultiesList', () => {
 
       await user.click(buttonEl)
 
-      expect(getFacultiesAction).toHaveBeenCalledOnce()
+      expect(getFacultiesQuery).toHaveBeenCalledOnce()
     })
   })
 })
