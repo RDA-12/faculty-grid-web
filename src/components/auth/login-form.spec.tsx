@@ -5,7 +5,9 @@ import { loginAction } from '@/lib/auth/auth.action'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/lib/auth/auth.action', () => ({
-  loginAction: vi.fn(),
+  loginAction: vi.fn().mockResolvedValue({
+    status: 200,
+  }),
 }))
 
 describe('LoginForm', () => {
@@ -63,7 +65,7 @@ describe('LoginForm', () => {
 
     it('should disbled login button and shows spinner when isPending', async () => {
       let resolveAction!: (v: ActionState<unknown, null>) => void
-      vi.mocked(loginAction).mockImplementation(
+      vi.mocked(loginAction).mockImplementationOnce(
         () =>
           new Promise((r) => {
             resolveAction = r
@@ -86,7 +88,7 @@ describe('LoginForm', () => {
     })
 
     it('should shows error when submit with invalid email/password', async () => {
-      vi.mocked(loginAction).mockResolvedValue({
+      vi.mocked(loginAction).mockResolvedValueOnce({
         errors: {
           email: 'Invalid email',
           password: 'Invalid password',
@@ -102,7 +104,7 @@ describe('LoginForm', () => {
     })
 
     it('should shows error toast when login is failed', async () => {
-      vi.mocked(loginAction).mockResolvedValue({
+      vi.mocked(loginAction).mockResolvedValueOnce({
         error: {
           status: 401,
           title: 'Error title',
