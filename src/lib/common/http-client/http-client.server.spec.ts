@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import httpClient from './http-client.server'
 
+vi.mock('../user-session', () => ({
+  getSessionData: vi.fn().mockResolvedValue({
+    accessToken: 'accessToken',
+  }),
+}))
+
 describe('httpClient', () => {
   const mockResponse = {
     status: 200,
@@ -24,7 +30,6 @@ describe('httpClient', () => {
   describe('post', () => {
     it('should do correct fetch request to backend proxy url', async () => {
       await httpClient.post('/external', {
-        headers: { Authorization: 'Bearer accessToken' },
         json: {
           name: 'lol',
         },
@@ -54,9 +59,7 @@ describe('httpClient', () => {
 
   describe('get', () => {
     it('should do correct fetch request to backend url', async () => {
-      await httpClient.get('/external', {
-        headers: { Authorization: 'Bearer accessToken' },
-      })
+      await httpClient.get('/external', {})
 
       expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
         'http://localhost:8000/external',
@@ -70,13 +73,7 @@ describe('httpClient', () => {
     })
 
     it('should do correct fetch request to backend url with params', async () => {
-      await httpClient.get(
-        '/external',
-        {
-          headers: { Authorization: 'Bearer accessToken' },
-        },
-        { page: 1, pageSize: 100 },
-      )
+      await httpClient.get('/external', {}, { page: 1, pageSize: 100 })
 
       expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
         'http://localhost:8000/external?page=1&pageSize=100',
