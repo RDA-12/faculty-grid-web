@@ -25,7 +25,7 @@ async function getMyIronSession() {
 export async function setSession(token: UserToken): Promise<void> {
   const logger = getLogger('setSession')
 
-  logger.debug('get session from iron-session')
+  logger.debug('get user session from iron-session')
   const session = await getMyIronSession()
   logger.debug('set session')
   session.accessToken = token.accessToken
@@ -35,12 +35,20 @@ export async function setSession(token: UserToken): Promise<void> {
 }
 
 export async function getSessionData(): Promise<Partial<SessionData>> {
-  const session = await getMyIronSession()
+  const logger = getLogger('getSessionData')
 
+  logger.debug('get user session from iron-session')
+  const session = await getMyIronSession()
+  logger.debug('session obtained')
   return session
 }
 
 export async function clearSessionData(): Promise<void> {
+  const logger = getLogger('clearSessionData')
+
+  logger.debug('get user session from iron-session')
   const session = await getMyIronSession()
+
+  logger.debug('session obtained. start clearing it')
   session.destroy()
 }
