@@ -4,11 +4,11 @@ export default function DashboardLayout({
   children,
 }: LayoutProps<'/dashboard'>) {
   return (
-    <div className="h-dvh w-dvw flex flex-row gap-8 pl-4 py-4">
+    <div className="h-dvh w-dvw flex flex-row gap-4 px-4 py-4">
       <nav className="min-w-90 h-full">
         <DashboardSidebar />
       </nav>
-      {children}
+      <div className="w-full bg-sidebar p-4 rounded-md">{children}</div>
     </div>
   )
 }

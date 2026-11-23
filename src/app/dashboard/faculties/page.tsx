@@ -1,10 +1,18 @@
-import AddFacultyButton from '@/components/faculties/add-faculty-button'
+export const instant = false
 
-export default function CreateFacultyPage() {
+import AddFacultyButton from '@/components/faculties/add-faculty-button'
+import FacultiesList from '@/components/faculties/faculties-list'
+import { getFacultiesAction } from '@/lib/faculties/faculties.action'
+import { connection } from 'next/server'
+
+export default async function CreateFacultyPage() {
+  await connection()
+  const result = await getFacultiesAction({})
+
   return (
-    <main className="flex flex-row gap-4">
+    <main className="flex flex-col gap-4">
       <AddFacultyButton />
-      <div>List of faculties (IN DEVELOPMENT)</div>
+      <FacultiesList initial={result} />
     </main>
   )
 }

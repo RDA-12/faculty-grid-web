@@ -41,5 +41,5 @@ export function getAuthResponse(
   method: HTTPMethod,
   status: HTTPStatus,
 ) {
-  return safeGetResponse(authResponse,endpoint,method,status)
+  return safeGetResponse(authResponse, endpoint, method, status)
 }

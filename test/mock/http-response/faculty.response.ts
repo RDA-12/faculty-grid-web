@@ -2,6 +2,7 @@ import {
   HTTPEndpointResponseMock,
   HTTPMethod,
   HTTPStatus,
+  internalError,
   safeGetResponse,
 } from './common.response'
 
@@ -29,6 +30,31 @@ const facultyResponse: HTTPEndpointResponseMock<FacultyEndpoint, Faculty> = {
           detail: 'Email/password/both is invalid. Please check again',
         },
       },
+      500: internalError,
+    },
+    GET: {
+      200: {
+        status: 200,
+        data: [
+          {
+            id: '01a1f881-5310-76ea-b7b7-56bc21c71aeb',
+            name: 'Fakultas Matematika dan Ilmu Pengetahuan Alam',
+          },
+        ],
+        pagination: {
+          page: 1,
+          pageSize: 5,
+          total: 5,
+        },
+      },
+      401: {
+        status: 401,
+        error: {
+          title: 'Provided credential is invalid',
+          detail: 'Email/password/both is invalid. Please check again',
+        },
+      },
+      500: internalError,
     },
   },
 }

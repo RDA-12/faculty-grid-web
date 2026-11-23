@@ -6,6 +6,8 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
     globals: true,
+    silent: true,
+    pool: 'vmThreads',
     environment: 'jsdom',
     root: './',
     include: ['**/*.spec{.tsx,.ts}'],
