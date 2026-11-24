@@ -1,30 +1,34 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { getFacultyResponse } from '../../../test/mock/http-response/faculty.response'
-import httpClient from '../common/http-client'
 import { getFacultiesQuery } from './faculties.query'
 import type { PaginatedData } from '../common/pagination'
 import type { Faculty } from './faculty.types'
-
-vi.mock('../common/http-client', () => ({
-  default: {
-    get: vi.fn().mockImplementation(() => {
-      return getFacultyResponse('/faculties', 'GET', 200)
-    }),
-  },
-}))
+import httpClient from '../../../test/mock/http-client'
+import type { PaginatedHTTPResponse } from '../common/http-client/common.http-client'
 
 describe('FacultiesQuery', () => {
   describe('getFacultiesQuery', () => {
+    beforeEach(() => {
+      httpClient.get.mockImplementation(
+        async (_endpoint, _options, _params) =>
+          getFacultyResponse(
+            '/faculties',
+            'GET',
+            200,
+          ) as PaginatedHTTPResponse<Faculty>,
+      )
+    })
+
     it('should return error when /faculties failed', async () => {
       const response = getFacultyResponse('/faculties', 'GET', 500)
-      vi.mocked(httpClient.get).mockImplementationOnce(async () => {
+      httpClient.get.mockImplementationOnce(async () => {
         return {
           status: response.status,
           error: response.error,
         }
       })
 
-      const result = await getFacultiesQuery()
+      const result = await getFacultiesQuery(httpClient)
 
       expect(result).toMatchObject({
         error: response.error,
@@ -32,7 +36,7 @@ describe('FacultiesQuery', () => {
     })
 
     it('should return correct faculties when /faculties success', async () => {
-      const result = await getFacultiesQuery()
+      const result = await getFacultiesQuery(httpClient)
 
       const expected = getFacultyResponse(
         '/faculties',
@@ -48,7 +52,7 @@ describe('FacultiesQuery', () => {
     })
 
     it('should call correct endpoint and params', async () => {
-      await getFacultiesQuery()
+      await getFacultiesQuery(httpClient)
 
       expect(httpClient.get).toHaveBeenCalledExactlyOnceWith(
         '/faculties',

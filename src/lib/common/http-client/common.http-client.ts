@@ -119,3 +119,5 @@ export function createHttpClient(
 
   return { post, get }
 }
+
+export type HTTPClient = ReturnType<typeof createHttpClient>

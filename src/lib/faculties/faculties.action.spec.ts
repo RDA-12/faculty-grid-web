@@ -2,9 +2,9 @@ import { redirect } from 'next/navigation'
 import { describe, expect, it, vi } from 'vitest'
 import { createFacultyAction } from './faculties.action'
 import { getFacultyResponse } from '../../../test/mock/http-response/faculty.response'
-import httpClient from '../common/http-client'
+import httpClient from '../common/http-client/http-client.server'
 
-vi.mock('../common/http-client', () => ({
+vi.mock('../common/http-client/http-client.server', () => ({
   default: {
     post: vi.fn().mockImplementation(() => {
       return getFacultyResponse('/faculties', 'POST', 200)

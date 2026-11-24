@@ -5,7 +5,7 @@ import { getLogger } from '../common/logger'
 import { ActionState, parseZodError } from '../common/types'
 import { CreateFacultyRequest, CreateFacultySchema } from './faculties.schema'
 import { Faculty } from './faculty.types'
-import httpClient from '../common/http-client'
+import httpClient from '../common/http-client/http-client.server'
 
 export async function createFacultyAction(
   _state: ActionState<CreateFacultyRequest, Faculty>,
