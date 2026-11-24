@@ -14,13 +14,21 @@ import { CircleX } from 'lucide-react'
 import { Button } from '../ui/button'
 import type { GetFacultiesQueryResult } from '@/lib/faculties/faculties.query'
 import { useFaculties } from '@/lib/faculties/faculties.hook'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 type FacultiesListProps = {
   initial?: GetFacultiesQueryResult
 }
 
 export default function FacultiesList({ initial }: FacultiesListProps) {
+  const router = useRouter()
   const { faculties, error, isLoading, getFaculties } = useFaculties(initial)
+
+  useEffect(() => {
+    if (error?.status !== 401) return
+    router.replace('/api/auth/logout')
+  }, [error, router])
 
   if (isLoading) {
     return <Spinner className="size-16" />

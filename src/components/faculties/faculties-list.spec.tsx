@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, render, screen } from '../../../test/rtl-helper'
 import FacultiesList from './faculties-list'
 import type { PaginatedData } from '@/lib/common/pagination'
@@ -8,7 +8,12 @@ import {
   type GetFacultiesQueryResult,
 } from '@/lib/faculties/faculties.query'
 import { internalError } from '../../../test/mock/http-response/common.response'
+import { useRouter } from 'next/navigation'
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
+}))
 vi.mock('@/lib/faculties/faculties.query', () => ({
   getFacultiesQuery: vi.fn(),
 }))
@@ -30,6 +35,16 @@ describe('FacultiesList', () => {
   const initial: GetFacultiesQueryResult = {
     data: initialData,
   }
+  let replaceMock = vi.fn().mockReturnValue({})
+  let useRouterMock: unknown = {
+    replace: replaceMock,
+  }
+
+  beforeEach(() => {
+    vi.mocked(useRouter).mockImplementation(
+      () => useRouterMock as AppRouterInstance,
+    )
+  })
 
   describe('Render', () => {
     it('should shows FacultiesTable when getFacultiesQuery is success', () => {
@@ -54,6 +69,21 @@ describe('FacultiesList', () => {
       expect(screen.getByText(internalError.error.title)).toBeVisible()
       expect(screen.getByText(internalError.error.detail)).toBeVisible()
       expect(screen.getByRole('button', { name: /coba lagi/i })).toBeVisible()
+    })
+
+    it('should redirect to logout when error is 401', () => {
+      render(
+        <FacultiesList
+          initial={{
+            error: {
+              status: 401,
+              ...internalError.error,
+            },
+          }}
+        />,
+      )
+
+      expect(replaceMock).toHaveBeenCalledExactlyOnceWith('/api/auth/logout')
     })
 
     it('should show spinner when getFacultiesQuery is pending', async () => {

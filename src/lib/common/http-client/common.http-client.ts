@@ -1,6 +1,14 @@
 import { getLogger } from '../logger'
-import { type Axios } from 'axios'
+import { type Axios, type AxiosRequestConfig } from 'axios'
 import type { Pagination, PaginationResult } from '../pagination'
+
+export type RetryAxiosConfig = {
+  /** To mark whether this request config is already retried or not
+   *
+   * Its to prevent infinite refresh when the server keeps return 401 to original request
+   */
+  _retry?: boolean
+} & AxiosRequestConfig
 
 type BaseServerHTTPResponse = {
   status: number
@@ -126,13 +134,14 @@ export function createHttpClient(axios: Axios) {
       validateStatus: () => true,
     })
     const jsonResponse = response.data
-    logger.debug('request success. return data')
     if (response.status >= 200 && response.status < 300) {
+      logger.debug('request success. return data')
       if (params) {
         return jsonResponse as ServerSuccessPaginatedHTTPResponse<T>
       }
       return jsonResponse as ServerSuccessHTTPResponse<T>
     }
+    logger.debug('request failed. return error')
     return {
       status: response.status,
       error: jsonResponse as ServerErrorHTTPResponse,
