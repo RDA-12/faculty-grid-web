@@ -1,5 +1,6 @@
 import { getLogger } from '@/lib/common/logger'
 import { getSessionData } from '@/lib/common/user-session'
+import { NextResponse } from 'next/server'
 
 const backendApiUrl = process.env.BACKEND_API_URL ?? 'http://localhost:8000'
 
@@ -18,11 +19,11 @@ async function handler(
   request.headers.append('Authorization', `Bearer ${session.accessToken}`)
 
   logger.debug('start making request')
-  const response = await fetch(backendApiUrl + endpoint, request)
+  const response = await fetch(backendApiUrl + '/' + endpoint, request)
   logger.debug('request finished. parse json response')
   const responseJson = await response.json()
   logger.debug('json response parsed')
-  return responseJson
+  return NextResponse.json(responseJson, { status: response.status })
 }
 
 export { handler as GET, handler as POST }
