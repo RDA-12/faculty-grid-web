@@ -3,12 +3,12 @@ import { loginAction } from './auth.action'
 import { getAuthResponse } from '../../../test/mock/http-response/auth.response'
 import { setSession } from '../common/user-session'
 import { describe, expect, it, vi } from 'vitest'
-import httpClient from '../common/http-client'
+import httpClient from '../common/http-client/http-client.server'
 
 vi.mock('../common/user-session', () => ({
   setSession: vi.fn().mockImplementation(() => {}),
 }))
-vi.mock('../common/http-client', () => ({
+vi.mock('../common/http-client/http-client.server', () => ({
   default: {
     post: vi.fn().mockImplementation(() => {
       return getAuthResponse('/auth/login', 'POST', 200)
