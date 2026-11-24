@@ -21,11 +21,11 @@ export default function LoginForm() {
   const [state, action, isPending] = useActionState(loginAction, {})
 
   useEffect(() => {
+    toast.dismiss()
     if (state.error) {
       toast.error(state.error.title, {
         description: state.error.detail,
         position: 'top-center',
-        duration: Infinity,
       })
     }
   }, [state.error])
