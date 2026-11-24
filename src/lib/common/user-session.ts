@@ -14,11 +14,16 @@ type SessionData = {
 }
 
 async function getMyIronSession() {
-  const session = await getIronSession<SessionData>(await cookies(), {
+  const logger = getLogger('getMyIronSession')
+
+  logger.debug('start getting cookies from next/headers')
+  const cookie = await cookies()
+  logger.debug('cookies obtained. start get my iron session', cookie)
+  const session = await getIronSession<SessionData>(cookie, {
     cookieName: 'session',
     password: process.env.SESSION_PASSWORD!,
   })
-
+  logger.debug('iron session obtained')
   return session
 }
 
