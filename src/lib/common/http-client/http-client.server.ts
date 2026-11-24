@@ -66,6 +66,7 @@ axiosClient.interceptors.response.use(async (response) => {
   // possible solutions:
   // 1. early cath on proxy, can't do that. It will easily have
   // race condition since the refreh token is rotated by server
+  // 2. make all read request to client (current implementation)
   logger.debug('refresh token success. retry request')
   const data = refreshResponse.data
   originalConfig.headers!.Authorization = `Bearer ${data.accessToken}`

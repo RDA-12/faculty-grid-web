@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PaginatedData } from '../common/pagination'
 import type { Faculty } from './faculty.types'
 import {
@@ -18,8 +18,9 @@ export function useFaculties(initialState?: GetFacultiesQueryResult) {
     initialState?.error ?? null,
   )
   const [isLoading, setIsLoading] = useState(false)
+  const didFetchOnMount = useRef(false)
 
-  async function getFaculties() {
+  const getFaculties = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     const queryResult = await getFacultiesQuery(httpClient)
@@ -29,7 +30,13 @@ export function useFaculties(initialState?: GetFacultiesQueryResult) {
     } else {
       setFaculties(queryResult.data!)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (initialState && didFetchOnMount.current) return
+    didFetchOnMount.current = true
+    void getFaculties()
+  }, [initialState, getFaculties])
 
   return { faculties, error, isLoading, getFaculties }
 }
