@@ -21,6 +21,7 @@ export function useFaculties(initialState?: GetFacultiesQueryResult) {
 
   async function getFaculties() {
     setIsLoading(true)
+    setError(null)
     const queryResult = await getFacultiesQuery(httpClient)
     setIsLoading(false)
     if (queryResult.error) {

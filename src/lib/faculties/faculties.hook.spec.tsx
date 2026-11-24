@@ -55,7 +55,7 @@ describe('FacultiesHook', () => {
       })
     })
 
-    it('should have isLoading true getFaculties called', async () => {
+    it('should have isLoading true and error null when getFaculties called', async () => {
       let resolve!: (_: GetFacultiesQueryResult) => void
       vi.mocked(getFacultiesQuery).mockImplementationOnce(
         () =>
@@ -66,6 +66,7 @@ describe('FacultiesHook', () => {
 
       const { result } = renderHook(() => useFaculties())
       expect(result.current.isLoading).toBeFalsy()
+      expect(result.current.error).toBeFalsy()
 
       let getFacultiesResolve: Promise<void>
       act(() => {
