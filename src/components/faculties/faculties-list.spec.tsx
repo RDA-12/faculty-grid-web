@@ -5,7 +5,7 @@ import type { PaginatedData } from '@/lib/common/pagination'
 import type { Faculty } from '@/lib/faculties/faculty.types'
 import {
   getFacultiesQuery,
-  type getFacultiesQueryResult,
+  type GetFacultiesQueryResult,
 } from '@/lib/faculties/faculties.query'
 import { internalError } from '../../../test/mock/http-response/common.response'
 
@@ -27,7 +27,7 @@ describe('FacultiesList', () => {
       total: 10,
     },
   }
-  const initial: getFacultiesQueryResult = {
+  const initial: GetFacultiesQueryResult = {
     data: initialData,
   }
 
@@ -57,7 +57,7 @@ describe('FacultiesList', () => {
     })
 
     it('should show spinner when getFacultiesQuery is pending', async () => {
-      let resolveAction!: (v: getFacultiesQueryResult) => void
+      let resolveAction!: (v: GetFacultiesQueryResult) => void
       vi.mocked(getFacultiesQuery).mockImplementation(
         () =>
           new Promise((r) => {
