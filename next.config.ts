@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   reactCompiler: true,
   typedRoutes: true,
+  logging: false,
 }
 
 export default nextConfig

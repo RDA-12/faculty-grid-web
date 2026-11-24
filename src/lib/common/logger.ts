@@ -2,6 +2,10 @@ import { ISettingsParam, Logger } from 'tslog'
 
 const root = new Logger({
   name: 'FacultyGrid',
+  pretty: {
+    template: '[{{dateIsoStr}}] [{{logLevelName}}] [{{name}}] ',
+    timeZone: 'local',
+  },
 })
 
 export function getLogger(
