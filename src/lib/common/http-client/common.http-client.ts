@@ -62,10 +62,19 @@ export function createHttpClient(
 
     logger.debug('start making request')
     const response = await fetch(baseUrl + endpoint, requestInit)
-
     logger.debug('request finished. parse response body')
     const jsonResponse = await response.json()
     logger.debug('response body parsed')
+
+    if (!response.ok) {
+      logger.debug('request failed. return error')
+      return {
+        status: response.status,
+        error: jsonResponse,
+      }
+    }
+
+    logger.debug('request success. return data')
     return jsonResponse
   }
 
@@ -110,10 +119,19 @@ export function createHttpClient(
     }
     logger.debug('start making the request')
     const response = await fetch(baseUrl + endpoint, requestInit)
-
     logger.debug('request finished. parse response body')
     const jsonResponse = await response.json()
     logger.debug('response body parsed')
+
+    if (!response.ok) {
+      logger.debug('request failed. return error')
+      return {
+        status: response.status,
+        error: jsonResponse,
+      }
+    }
+
+    logger.debug('request success. return data')
     return jsonResponse
   }
 

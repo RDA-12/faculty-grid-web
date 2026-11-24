@@ -8,7 +8,14 @@ describe('httpClient', () => {
       id: 'lol',
     },
   }
+  const mockErrorResponse = {
+    status: 500,
+    title: 'Title',
+    detail: 'Detail',
+  }
   let fetchMock = vi.fn().mockResolvedValue({
+    status: 200,
+    ok: true,
     json: async () => mockResponse,
   })
   let httpClient: HTTPClient
@@ -42,12 +49,29 @@ describe('httpClient', () => {
       })
     })
 
-    it('should forward formatted response', async () => {
+    it('should forward formatted response when success', async () => {
       const result = await httpClient.post('/external', {
         headers: { Authorization: 'Bearer accessToken' },
       })
 
       expect(result).toStrictEqual(mockResponse)
+    })
+
+    it('should forward formatted response when failed', async () => {
+      fetchMock.mockResolvedValueOnce({
+        status: 500,
+        ok: false,
+        json: async () => mockErrorResponse,
+      })
+
+      const result = await httpClient.post('/external', {
+        headers: { Authorization: 'Bearer accessToken' },
+      })
+
+      expect(result).toStrictEqual({
+        status: 500,
+        error: mockErrorResponse,
+      })
     })
   })
 
@@ -85,12 +109,29 @@ describe('httpClient', () => {
       )
     })
 
-    it('should forward formatted response', async () => {
+    it('should forward formatted response when success', async () => {
       const result = await httpClient.get('/external', {
         headers: { Authorization: 'Bearer accessToken' },
       })
 
       expect(result).toStrictEqual(mockResponse)
+    })
+
+    it('should forward formatted response when failed', async () => {
+      fetchMock.mockResolvedValueOnce({
+        status: 500,
+        ok: false,
+        json: async () => mockErrorResponse,
+      })
+
+      const result = await httpClient.get('/external', {
+        headers: { Authorization: 'Bearer accessToken' },
+      })
+
+      expect(result).toStrictEqual({
+        status: 500,
+        error: mockErrorResponse,
+      })
     })
   })
 })
