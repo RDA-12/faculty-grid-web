@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import httpClient from './http-client.browser'
+import { createHttpClient, type HTTPClient } from './common.http-client'
 
 describe('httpClient', () => {
   const mockResponse = {
@@ -11,8 +11,10 @@ describe('httpClient', () => {
   let fetchMock = vi.fn().mockResolvedValue({
     json: async () => mockResponse,
   })
+  let httpClient: HTTPClient
 
   beforeEach(() => {
+    httpClient = createHttpClient('baseUrl')
     vi.stubGlobal('fetch', fetchMock)
   })
 
@@ -30,17 +32,14 @@ describe('httpClient', () => {
         },
       })
 
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        'http://localhost:3000/api/proxy/external',
-        {
-          headers: {
-            Authorization: 'Bearer accessToken',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ name: 'lol' }),
-          method: 'POST',
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith('baseUrl/external', {
+        headers: {
+          Authorization: 'Bearer accessToken',
+          'Content-Type': 'application/json',
         },
-      )
+        body: JSON.stringify({ name: 'lol' }),
+        method: 'POST',
+      })
     })
 
     it('should forward formatted response', async () => {
@@ -58,15 +57,12 @@ describe('httpClient', () => {
         headers: { Authorization: 'Bearer accessToken' },
       })
 
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        'http://localhost:3000/api/proxy/external',
-        {
-          headers: {
-            Authorization: 'Bearer accessToken',
-          },
-          method: 'GET',
+      expect(fetchMock).toHaveBeenCalledExactlyOnceWith('baseUrl/external', {
+        headers: {
+          Authorization: 'Bearer accessToken',
         },
-      )
+        method: 'GET',
+      })
     })
 
     it('should do correct fetch request to proxy url with params', async () => {
@@ -79,7 +75,7 @@ describe('httpClient', () => {
       )
 
       expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        'http://localhost:3000/api/proxy/external?page=1&pageSize=100',
+        'baseUrl/external?page=1&pageSize=100',
         {
           headers: {
             Authorization: 'Bearer accessToken',
