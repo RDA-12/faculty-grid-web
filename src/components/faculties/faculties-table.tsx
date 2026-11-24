@@ -27,8 +27,12 @@ const columns = columnHelper.columns([
       const displayIndex = row.getDisplayIndex()
       return displayIndex === -1 ? '' : displayIndex + 1
     },
+    meta: {
+      align: 'center',
+    },
   }),
   columnHelper.accessor('name', {
+    id: 'name',
     header: 'Nama Fakultas',
   }),
 ])
@@ -50,8 +54,13 @@ export default function FacultiesTable({ faculties }: FacultiesTableProps) {
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
+                const isNumber = header.id === 'number'
+
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className={isNumber ? 'w-12 text-center' : undefined}
+                  >
                     {header.isPlaceholder ? null : (
                       <table.FlexRender header={header} />
                     )}
@@ -65,11 +74,17 @@ export default function FacultiesTable({ faculties }: FacultiesTableProps) {
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
-                {row.getAllCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    <table.FlexRender cell={cell} />
-                  </TableCell>
-                ))}
+                {row.getAllCells().map((cell) => {
+                  const isNumber = cell.column.id === 'number'
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className={isNumber ? 'text-center' : undefined}
+                    >
+                      <table.FlexRender cell={cell} />
+                    </TableCell>
+                  )
+                })}
               </TableRow>
             ))
           ) : (
