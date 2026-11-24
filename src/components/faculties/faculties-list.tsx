@@ -45,7 +45,13 @@ export default function FacultiesList({ initial }: FacultiesListProps) {
           <EmptyDescription>{error.detail}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={getFaculties}>Coba lagi</Button>
+          <Button
+            onClick={() => {
+              void getFaculties(true)
+            }}
+          >
+            Coba lagi
+          </Button>
         </EmptyContent>
       </Empty>
     )

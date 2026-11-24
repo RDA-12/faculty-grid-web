@@ -1,42 +1,43 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import type { PaginatedData } from '../common/pagination'
-import type { Faculty } from './faculty.types'
 import {
   getFacultiesQuery,
   type GetFacultiesQueryResult,
 } from './faculties.query'
-import { ResponseError } from '../common/types'
 import httpClient from '../common/http-client/http-client.browser'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 export function useFaculties(initialState?: GetFacultiesQueryResult) {
-  const [faculties, setFaculties] = useState<PaginatedData<Faculty> | null>(
-    initialState?.data ?? null,
-  )
-  const [error, setError] = useState<ResponseError | null>(
-    initialState?.error ?? null,
-  )
-  const [isLoading, setIsLoading] = useState(false)
-  const didFetchOnMount = useRef(false)
+  const queryClient = useQueryClient()
 
-  const getFaculties = useCallback(async () => {
-    setIsLoading(true)
-    setError(null)
-    const queryResult = await getFacultiesQuery(httpClient)
-    setIsLoading(false)
-    if (queryResult.error) {
-      setError(queryResult.error)
-    } else {
-      setFaculties(queryResult.data!)
-    }
-  }, [])
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: ['faculties'],
+    queryFn: async () => {
+      return getFacultiesQuery(httpClient)
+    },
+    initialData: initialState,
+  })
 
-  useEffect(() => {
-    if (initialState && didFetchOnMount.current) return
-    didFetchOnMount.current = true
-    void getFaculties()
-  }, [initialState, getFaculties])
-
-  return { faculties, error, isLoading, getFaculties }
+  return {
+    faculties: data?.data ?? null,
+    error: data?.error ?? null,
+    isLoading: isFetching,
+    getFaculties: async (force: boolean = false) => {
+      if (force) {
+        await refetch()
+        return
+      }
+      await queryClient.query({
+        queryKey: ['faculties'],
+        queryFn: async () => {
+          const result = await getFacultiesQuery(httpClient)
+          if (result.error) {
+            throw result.error
+          }
+          return result
+        },
+        initialData: initialState,
+      })
+    },
+  }
 }

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, render, screen } from '../../../test/rtl-helper'
+import { act, render, screen, waitFor } from '../../../test/rtl-helper'
 import FacultiesList from './faculties-list'
 import type { PaginatedData } from '@/lib/common/pagination'
 import type { Faculty } from '@/lib/faculties/faculty.types'
@@ -86,9 +86,9 @@ describe('FacultiesList', () => {
       expect(replaceMock).toHaveBeenCalledExactlyOnceWith('/api/auth/logout')
     })
 
-    it('should show spinner when getFacultiesQuery is pending', async () => {
+    it('should show loading toast when getFacultiesQuery is pending', async () => {
       let resolveAction!: (v: GetFacultiesQueryResult) => void
-      vi.mocked(getFacultiesQuery).mockImplementation(
+      vi.mocked(getFacultiesQuery).mockImplementationOnce(
         () =>
           new Promise((r) => {
             resolveAction = r
@@ -110,13 +110,15 @@ describe('FacultiesList', () => {
         await user.click(screen.getByRole('button', { name: /coba lagi/i }))
       })
 
-      expect(screen.getByRole('status')).toBeVisible()
+      await waitFor(() => expect(screen.getByRole('status')).toBeVisible())
 
       await act(async () => {
         resolveAction({})
       })
 
-      expect(screen.queryByRole('status')).not.toBeInTheDocument()
+      await waitFor(() =>
+        expect(screen.queryByRole('status')).not.toBeInTheDocument(),
+      )
     })
   })
 
