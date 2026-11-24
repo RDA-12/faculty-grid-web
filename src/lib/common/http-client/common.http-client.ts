@@ -1,5 +1,30 @@
 import { getLogger } from '../logger'
+import { type Axios } from 'axios'
 import type { Pagination, PaginationResult } from '../pagination'
+
+type BaseServerHTTPResponse = {
+  status: number
+}
+
+type ServerErrorHTTPResponse = {
+  title: string
+  detail: string
+  errors: unknown[]
+} & BaseServerHTTPResponse
+
+type ServerSuccessHTTPResponse<T> = {
+  data?: T
+} & BaseServerHTTPResponse
+
+type ServerSuccessPaginatedHTTPResponse<T> = {
+  data?: T[]
+  pagination?: PaginationResult
+} & BaseServerHTTPResponse
+
+type ServerHTTPResponse<T> =
+  | ServerSuccessHTTPResponse<T>
+  | ServerSuccessPaginatedHTTPResponse<T>
+  | ServerErrorHTTPResponse
 
 type HTTPError = {
   title: string
@@ -21,18 +46,17 @@ export type PaginatedHTTPResponse<T> = {
 }
 
 export type HTTPOptions = {
-  json?: unknown
   headers?: Record<string, any>
-} & Omit<RequestInit, 'method' | 'body' | 'headers'>
+  json?: Record<string, string>
+}
 
-export function createHttpClient(
-  baseUrl: string,
-  optionsBuilder?: () => Promise<HTTPOptions>,
-) {
+export function createHttpClient(axios: Axios) {
   /**
    * Make post request to endpoint with options.
    *
-   * It will automatically add Authorization header
+   * It will automatically add Authorization header.
+   *
+   * NOTE: It assumes the T is single object not a list
    */
   async function post<T>(
     endpoint: string,
@@ -40,42 +64,28 @@ export function createHttpClient(
   ): Promise<HTTPResponse<T>> {
     const logger = getLogger('httpClient.post')
 
-    const { json, headers, ...rest } = options
-    const effectiveHeaders =
-      headers instanceof Array
-        ? Object.fromEntries(headers)
-        : (headers as Record<string, string>)
-    const optionsBuilderRequestInit = optionsBuilder
-      ? await optionsBuilder()
-      : {}
-    const requestInit: RequestInit = {
-      ...rest,
-      ...optionsBuilderRequestInit,
-      method: 'POST',
-      headers: {
-        ...effectiveHeaders,
-        ...optionsBuilderRequestInit.headers,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(json),
-    }
-
     logger.debug('start making request')
-    const response = await fetch(baseUrl + endpoint, requestInit)
-    logger.debug('request finished. parse response body')
-    const jsonResponse = await response.json()
-    logger.debug('response body parsed')
-
-    if (!response.ok) {
-      logger.debug('request failed. return error')
+    const response = await axios.post<ServerHTTPResponse<T>>(
+      endpoint,
+      options.json,
+      {
+        headers: options.headers,
+        validateStatus: () => true,
+      },
+    )
+    const jsonResponse = response.data
+    if (response.status >= 200 && response.status < 300) {
+      logger.debug('request success. return data')
       return {
         status: response.status,
-        error: jsonResponse,
+        data: (jsonResponse as ServerSuccessHTTPResponse<T>).data,
       }
     }
-
-    logger.debug('request success. return data')
-    return jsonResponse
+    logger.debug('request failed. return error')
+    return {
+      status: response.status,
+      error: jsonResponse as ServerErrorHTTPResponse,
+    }
   }
 
   /**
@@ -98,41 +108,35 @@ export function createHttpClient(
     options: Omit<HTTPOptions, 'json'>,
     params: Pagination,
   ): Promise<PaginatedHTTPResponse<T>>
+
   async function get<T>(
     endpoint: string,
-    options: Omit<HTTPOptions, 'json'> = {},
+    options: Omit<HTTPOptions, 'json'>,
     params?: Pagination,
-  ): Promise<HTTPResponse<T>> {
+  ): Promise<HTTPResponse<T> | PaginatedHTTPResponse<T>> {
     const logger = getLogger('httpClient.get')
     if (params) {
       logger.debug('apply query params')
       endpoint = `${endpoint}?${new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]))}`
     }
 
-    const optionsBuilderRequestInit = optionsBuilder
-      ? await optionsBuilder()
-      : {}
-    const requestInit: RequestInit = {
-      ...options,
-      ...optionsBuilderRequestInit,
-      method: 'GET',
-    }
-    logger.debug('start making the request')
-    const response = await fetch(baseUrl + endpoint, requestInit)
-    logger.debug('request finished. parse response body')
-    const jsonResponse = await response.json()
-    logger.debug('response body parsed')
-
-    if (!response.ok) {
-      logger.debug('request failed. return error')
-      return {
-        status: response.status,
-        error: jsonResponse,
-      }
-    }
-
+    logger.debug('start making request')
+    const response = await axios.get<ServerHTTPResponse<T>>(endpoint, {
+      headers: options.headers,
+      validateStatus: () => true,
+    })
+    const jsonResponse = response.data
     logger.debug('request success. return data')
-    return jsonResponse
+    if (response.status >= 200 && response.status < 300) {
+      if (params) {
+        return jsonResponse as ServerSuccessPaginatedHTTPResponse<T>
+      }
+      return jsonResponse as ServerSuccessHTTPResponse<T>
+    }
+    return {
+      status: response.status,
+      error: jsonResponse as ServerErrorHTTPResponse,
+    }
   }
 
   return { post, get }

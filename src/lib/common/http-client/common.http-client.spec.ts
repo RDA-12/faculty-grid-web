@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createHttpClient, type HTTPClient } from './common.http-client'
+import type { Axios } from 'axios'
 
 describe('httpClient', () => {
   const mockResponse = {
@@ -13,25 +14,25 @@ describe('httpClient', () => {
     title: 'Title',
     detail: 'Detail',
   }
-  let fetchMock = vi.fn().mockResolvedValue({
-    status: 200,
-    ok: true,
-    json: async () => mockResponse,
-  })
+
+  let getMock = vi.fn().mockResolvedValue({ status: 200, data: mockResponse })
+  let postMock = vi.fn().mockResolvedValue({ status: 200, data: mockResponse })
+  let axiosMock = {
+    get: getMock,
+    post: postMock,
+  }
   let httpClient: HTTPClient
 
   beforeEach(() => {
-    httpClient = createHttpClient('baseUrl')
-    vi.stubGlobal('fetch', fetchMock)
+    httpClient = createHttpClient(axiosMock as unknown as Axios)
   })
 
   afterEach(() => {
-    vi.unstubAllGlobals()
     vi.clearAllMocks()
   })
 
   describe('post', () => {
-    it('should do correct fetch request to internal proxy url', async () => {
+    it('should do correct axios request to the url', async () => {
       await httpClient.post('/external', {
         headers: { Authorization: 'Bearer accessToken' },
         json: {
@@ -39,14 +40,15 @@ describe('httpClient', () => {
         },
       })
 
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith('baseUrl/external', {
-        headers: {
-          Authorization: 'Bearer accessToken',
-          'Content-Type': 'application/json',
+      expect(axiosMock.post).toHaveBeenCalledExactlyOnceWith(
+        '/external',
+        {
+          name: 'lol',
         },
-        body: JSON.stringify({ name: 'lol' }),
-        method: 'POST',
-      })
+        expect.objectContaining({
+          headers: { Authorization: 'Bearer accessToken' },
+        }),
+      )
     })
 
     it('should forward formatted response when success', async () => {
@@ -58,10 +60,9 @@ describe('httpClient', () => {
     })
 
     it('should forward formatted response when failed', async () => {
-      fetchMock.mockResolvedValueOnce({
+      axiosMock.post.mockResolvedValueOnce({
         status: 500,
-        ok: false,
-        json: async () => mockErrorResponse,
+        data: mockErrorResponse,
       })
 
       const result = await httpClient.post('/external', {
@@ -76,57 +77,45 @@ describe('httpClient', () => {
   })
 
   describe('get', () => {
-    it('should do correct fetch request to proxy url', async () => {
+    it('should do correct axios request to url', async () => {
       await httpClient.get('/external', {
-        headers: { Authorization: 'Bearer accessToken' },
-      })
-
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith('baseUrl/external', {
         headers: {
           Authorization: 'Bearer accessToken',
         },
-        method: 'GET',
       })
-    })
 
-    it('should do correct fetch request to proxy url with params', async () => {
-      await httpClient.get(
+      expect(axiosMock.get).toHaveBeenCalledExactlyOnceWith(
         '/external',
-        {
-          headers: { Authorization: 'Bearer accessToken' },
-        },
-        { page: 1, pageSize: 100 },
-      )
-
-      expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
-        'baseUrl/external?page=1&pageSize=100',
-        {
+        expect.objectContaining({
           headers: {
             Authorization: 'Bearer accessToken',
           },
-          method: 'GET',
-        },
+        }),
+      )
+    })
+
+    it('should do correct axios request to url with params', async () => {
+      await httpClient.get('/external', {}, { page: 1, pageSize: 100 })
+
+      expect(axiosMock.get).toHaveBeenCalledExactlyOnceWith(
+        '/external?page=1&pageSize=100',
+        expect.anything(),
       )
     })
 
     it('should forward formatted response when success', async () => {
-      const result = await httpClient.get('/external', {
-        headers: { Authorization: 'Bearer accessToken' },
-      })
+      const result = await httpClient.get('/external', {})
 
       expect(result).toStrictEqual(mockResponse)
     })
 
     it('should forward formatted response when failed', async () => {
-      fetchMock.mockResolvedValueOnce({
+      axiosMock.get.mockResolvedValueOnce({
         status: 500,
-        ok: false,
-        json: async () => mockErrorResponse,
+        data: mockErrorResponse,
       })
 
-      const result = await httpClient.get('/external', {
-        headers: { Authorization: 'Bearer accessToken' },
-      })
+      const result = await httpClient.get('/external', {})
 
       expect(result).toStrictEqual({
         status: 500,
