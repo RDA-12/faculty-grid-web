@@ -4,9 +4,14 @@ import { createFacultyAction } from '@/lib/faculties/faculties.action'
 import { ActionState } from '@/lib/common/types'
 import { Faculty } from '@/lib/faculties/faculty.types'
 import FacultyForm from './faculty-form'
+import { getFacultiesQuery } from '@/lib/faculties/faculties.query'
 
 vi.mock('@/lib/faculties/faculties.action', () => ({
   createFacultyAction: vi.fn(),
+}))
+
+vi.mock('@/lib/faculties/faculties.query', () => ({
+  getFacultiesQuery: vi.fn(),
 }))
 
 describe('FacultyForm', () => {
@@ -137,6 +142,18 @@ describe('FacultyForm', () => {
         {},
         expectedFormData,
       )
+    })
+  })
+
+  describe('Side Effects', () => {
+    it('should reload faculties when succeed', async () => {
+      const { user } = render(<FacultyForm />)
+
+      await inputName(user, 'fakultas teknik')
+      await clickSubmit(user)
+
+      // Initial fetch and when success
+      expect(getFacultiesQuery).toHaveBeenCalledTimes(2)
     })
   })
 })

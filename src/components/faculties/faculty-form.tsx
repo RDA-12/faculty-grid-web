@@ -13,12 +13,14 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { Spinner } from '../ui/spinner'
 import { toast } from 'sonner'
+import { useFaculties } from '@/lib/faculties/faculties.hook'
 
 /**
  * Creates Fieldset consists of Fields to create new faculty
  */
 export default function FacultyForm() {
   const [state, action, isPending] = useActionState(createFacultyAction, {})
+  const { getFaculties } = useFaculties()
 
   useEffect(() => {
     toast.dismiss()
@@ -34,8 +36,9 @@ export default function FacultyForm() {
         duration: Infinity,
         position: 'top-center',
       })
+      void getFaculties(true)
     }
-  }, [state.error, state.data])
+  }, [state.error, state.data, getFaculties])
 
   return (
     <FieldSet data-testid="FacultyForm">
