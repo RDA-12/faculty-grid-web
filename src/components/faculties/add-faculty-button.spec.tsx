@@ -1,6 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '../../../test/rtl-helper'
 import AddFacultyButton from './add-faculty-button'
+
+vi.mock('@/lib/faculties/faculties.action', () => ({
+  createFacultyAction: vi.fn(),
+}))
 
 describe('AddFacultyButton', () => {
   const label = 'Tambah baru'
