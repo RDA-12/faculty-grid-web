@@ -1,21 +1,18 @@
-'use server'
-
-import { redirect } from 'next/navigation'
+import 'client-only'
 import { getLogger } from '../common/logger'
 import { ActionState, parseZodError } from '../common/types'
 import { CreateFacultyRequest, CreateFacultySchema } from './faculties.schema'
 import { Faculty } from './faculty.types'
-import httpClient from '../common/http-client/http-client.server'
+import httpClient from '../common/http-client/http-client.browser'
 
 export async function createFacultyAction(
-  _state: ActionState<CreateFacultyRequest, Faculty>,
-  formData: FormData,
+  args: CreateFacultyRequest,
 ): Promise<ActionState<CreateFacultyRequest, Faculty>> {
   const logger = getLogger('createFacultyAction')
 
   logger.debug('start parsing data')
   const parsedResult = CreateFacultySchema.safeParse({
-    name: formData.get('name'),
+    name: args.name,
   })
   if (!parsedResult.success) {
     logger.debug('parse failed')
@@ -31,10 +28,6 @@ export async function createFacultyAction(
 
   if (response.error) {
     logger.debug('create faculty failed')
-    if (response.status === 401) {
-      logger.debug('failed due to token expired. redirect to logout')
-      redirect('/api/auth/logout')
-    }
     return {
       error: { status: response.status, ...response.error },
     }
@@ -46,7 +39,6 @@ export async function createFacultyAction(
 }
 
 export async function deleteFacultyAction(
-  _prev: ActionState<string, boolean>,
   id: string,
 ): Promise<ActionState<string, boolean>> {
   const logger = getLogger('deleteFacultyAction')
@@ -56,10 +48,6 @@ export async function deleteFacultyAction(
 
   if (response?.error) {
     logger.debug('delete faculty failed')
-    if (response.status === 401) {
-      logger.debug('failed due to token expired/invalid. redirect to logout')
-      redirect('/api/auth/logout')
-    }
     return {
       error: {
         status: response.status,

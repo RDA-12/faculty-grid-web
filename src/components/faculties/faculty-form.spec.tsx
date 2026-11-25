@@ -1,10 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
-import { act, render, screen, type UserEvent } from '../../../test/rtl-helper'
+import {
+  act,
+  render,
+  screen,
+  within,
+  type UserEvent,
+} from '../../../test/rtl-helper'
 import { createFacultyAction } from '@/lib/faculties/faculties.action'
 import { ActionState } from '@/lib/common/types'
 import { Faculty } from '@/lib/faculties/faculty.types'
 import FacultyForm from './faculty-form'
-import { getFacultiesQuery } from '@/lib/faculties/faculties.query'
+import type { CreateFacultyRequest } from '@/lib/faculties/faculties.schema'
 
 vi.mock('@/lib/faculties/faculties.action', () => ({
   createFacultyAction: vi.fn(),
@@ -46,7 +52,7 @@ describe('FacultyForm', () => {
       ).toBeVisible()
     })
 
-    it('should disable save button and spinner when pending', async () => {
+    it('should disable save button and show spinner when pending', async () => {
       let resolveAction!: (v: ActionState<unknown, Faculty>) => void
       vi.mocked(createFacultyAction).mockImplementation(
         () =>
@@ -57,6 +63,7 @@ describe('FacultyForm', () => {
 
       const { user } = render(<FacultyForm />)
 
+      await inputName(user, 'fakultas')
       await clickSubmit(user)
 
       expect(
@@ -99,13 +106,12 @@ describe('FacultyForm', () => {
 
       const { user } = render(<FacultyForm />)
 
+      await inputName(user, 'fakultas')
       await clickSubmit(user)
 
-      expect(
-        await screen.findByRole('region', { name: /notifications/i }),
-      ).toBeVisible()
-      expect(await screen.findByText('Error title')).toBeVisible()
-      expect(await screen.findByText('Error detail')).toBeVisible()
+      const regionEL = screen.getByRole('region', { name: /notifications/i })
+      expect(within(regionEL).getByText('Error title')).toBeVisible()
+      expect(within(regionEL).getByText('Error detail')).toBeVisible()
     })
 
     it('should shows success toast when createFacultyAction is success', async () => {
@@ -118,10 +124,13 @@ describe('FacultyForm', () => {
 
       const { user } = render(<FacultyForm />)
 
+      await inputName(user, 'fakultas')
       await clickSubmit(user)
 
       expect(
-        await screen.findByText('Fakultas baru berhasil dibuat'),
+        within(
+          screen.getByRole('region', { name: /notifications/i }),
+        ).getByText('Fakultas baru berhasil dibuat'),
       ).toBeVisible()
     })
   })
@@ -141,24 +150,10 @@ describe('FacultyForm', () => {
       await inputName(user, 'fakultas teknik')
       await clickSubmit(user)
 
-      const expectedFormData = new FormData()
-      expectedFormData.append('name', 'fakultas teknik')
-      expect(createFacultyAction).toHaveBeenCalledExactlyOnceWith(
-        {},
-        expectedFormData,
-      )
-    })
-  })
-
-  describe('Side Effects', () => {
-    it('should reload faculties when succeed', async () => {
-      const { user } = render(<FacultyForm />)
-
-      await inputName(user, 'fakultas teknik')
-      await clickSubmit(user)
-
-      // Initial fetch and when success
-      expect(getFacultiesQuery).toHaveBeenCalledTimes(2)
+      const expectedArgs: CreateFacultyRequest = {
+        name: 'fakultas teknik',
+      }
+      expect(createFacultyAction).toHaveBeenCalledExactlyOnceWith(expectedArgs)
     })
   })
 })
