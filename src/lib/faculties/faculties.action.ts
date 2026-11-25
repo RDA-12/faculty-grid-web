@@ -44,3 +44,31 @@ export async function createFacultyAction(
     data: response.data,
   }
 }
+
+export async function deleteFacultyAction(
+  _prev: ActionState<string, boolean>,
+  id: string,
+): Promise<ActionState<string, boolean>> {
+  const logger = getLogger('deleteFacultyAction')
+
+  logger.debug('start deleting a faculty')
+  const response = await httpClient.delete(`/faculties/${id}`, {})
+
+  if (response?.error) {
+    logger.debug('delete faculty failed')
+    if (response.status === 401) {
+      logger.debug('failed due to token expired/invalid. redirect to logout')
+      redirect('/api/auth/logout')
+    }
+    return {
+      error: {
+        status: response.status,
+        ...response.error,
+      },
+    }
+  }
+  logger.debug('delete faculty success')
+  return {
+    data: true,
+  }
+}

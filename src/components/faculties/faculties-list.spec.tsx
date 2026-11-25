@@ -15,7 +15,15 @@ vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
 }))
 vi.mock('@/lib/faculties/faculties.query', () => ({
-  getFacultiesQuery: vi.fn(),
+  getFacultiesQuery: vi.fn().mockResolvedValue({
+    data: {
+      data: [],
+      pagination: { page: 1, pageSize: 5, total: 0 },
+    },
+  }),
+}))
+vi.mock('@/lib/faculties/faculties.action', () => ({
+  deleteFacultyAction: vi.fn(),
 }))
 
 describe('FacultiesList', () => {
@@ -106,9 +114,7 @@ describe('FacultiesList', () => {
         />,
       )
 
-      await act(async () => {
-        await user.click(screen.getByRole('button', { name: /coba lagi/i }))
-      })
+      await user.click(screen.getByRole('button', { name: /coba lagi/i }))
 
       await waitFor(() => expect(screen.getByRole('status')).toBeVisible())
 

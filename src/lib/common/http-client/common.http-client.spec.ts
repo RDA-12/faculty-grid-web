@@ -17,9 +17,11 @@ describe('httpClient', () => {
 
   let getMock = vi.fn().mockResolvedValue({ status: 200, data: mockResponse })
   let postMock = vi.fn().mockResolvedValue({ status: 200, data: mockResponse })
+  let deleteMock = vi.fn().mockResolvedValue({ status: 204, data: undefined })
   let axiosMock = {
     get: getMock,
     post: postMock,
+    delete: deleteMock,
   }
   let httpClient: HTTPClient
 
@@ -116,6 +118,45 @@ describe('httpClient', () => {
       })
 
       const result = await httpClient.get('/external', {})
+
+      expect(result).toStrictEqual({
+        status: 500,
+        error: mockErrorResponse,
+      })
+    })
+  })
+
+  describe('deleteMethod', () => {
+    it('should do correct axios request to url', async () => {
+      await httpClient.delete('/external', {
+        headers: {
+          Authorization: 'Bearer accessToken',
+        },
+      })
+
+      expect(axiosMock.delete).toHaveBeenCalledExactlyOnceWith(
+        '/external',
+        expect.objectContaining({
+          headers: {
+            Authorization: 'Bearer accessToken',
+          },
+        }),
+      )
+    })
+
+    it('should forward formatted response when success', async () => {
+      const result = await httpClient.delete('/external', {})
+
+      expect(result).toStrictEqual({ status: 204 })
+    })
+
+    it('should forward formatted response when failed', async () => {
+      axiosMock.delete.mockResolvedValueOnce({
+        status: 500,
+        data: mockErrorResponse,
+      })
+
+      const result = await httpClient.delete('/external', {})
 
       expect(result).toStrictEqual({
         status: 500,

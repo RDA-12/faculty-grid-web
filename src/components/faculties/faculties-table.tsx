@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/table'
+import FacultiesAction from './faculty-actions'
 
 const features = tableFeatures({})
 
@@ -27,13 +28,14 @@ const columns = columnHelper.columns([
       const displayIndex = row.getDisplayIndex()
       return displayIndex === -1 ? '' : displayIndex + 1
     },
-    meta: {
-      align: 'center',
-    },
   }),
   columnHelper.accessor('name', {
     id: 'name',
     header: 'Nama Fakultas',
+  }),
+  columnHelper.display({
+    id: 'actions',
+    cell: ({ row }) => <FacultiesAction faculty={row.original} />,
   }),
 ])
 
@@ -54,12 +56,13 @@ export default function FacultiesTable({ faculties }: FacultiesTableProps) {
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
-                const isNumber = header.id === 'number'
+                const smallHeader =
+                  header.id === 'number' || header.id === 'actions'
 
                 return (
                   <TableHead
                     key={header.id}
-                    className={isNumber ? 'w-12 text-center' : undefined}
+                    className={smallHeader ? 'w-16 text-center' : undefined}
                   >
                     {header.isPlaceholder ? null : (
                       <table.FlexRender header={header} />
@@ -75,11 +78,12 @@ export default function FacultiesTable({ faculties }: FacultiesTableProps) {
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getAllCells().map((cell) => {
-                  const isNumber = cell.column.id === 'number'
+                  const smallHeader =
+                    cell.column.id === 'number' || cell.column.id === 'actions'
                   return (
                     <TableCell
                       key={cell.id}
-                      className={isNumber ? 'text-center' : undefined}
+                      className={smallHeader ? 'text-center' : undefined}
                     >
                       <table.FlexRender cell={cell} />
                     </TableCell>
@@ -90,7 +94,7 @@ export default function FacultiesTable({ faculties }: FacultiesTableProps) {
           ) : (
             <TableRow>
               <TableCell
-                colSpan={columns.length}
+                colSpan={columns.length + 1}
                 className="min-h-24 h-full text-center"
               >
                 Belum ada fakultas yang ditambahkan

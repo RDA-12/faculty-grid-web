@@ -148,7 +148,32 @@ export function createHttpClient(axios: Axios) {
     }
   }
 
-  return { post, get }
+  async function deleteMethod<T>(
+    endpoint: string,
+    options: HTTPOptions,
+  ): Promise<HTTPResponse<T>> {
+    const logger = getLogger('httpClient.delete')
+
+    logger.debug('start making request')
+    const response = await axios.delete<ServerHTTPResponse<null>>(endpoint, {
+      headers: options.headers,
+      validateStatus: () => true,
+    })
+    const jsonResponse = response.data
+    if (response.status >= 200 && response.status < 300) {
+      logger.debug('request success. return data')
+      return {
+        status: 204,
+      }
+    }
+    logger.debug('request failed. return error')
+    return {
+      status: response.status,
+      error: jsonResponse as ServerErrorHTTPResponse,
+    }
+  }
+
+  return { post, get, delete: deleteMethod }
 }
 
 export type HTTPClient = ReturnType<typeof createHttpClient>

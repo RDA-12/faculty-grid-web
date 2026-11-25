@@ -1,6 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render, screen, within } from '../../../test/rtl-helper'
 import FacultiesTable from './faculties-table'
+
+vi.mock('@/lib/faculties/faculties.action', () => ({
+  deleteFacultyAction: vi.fn(),
+}))
 
 describe('FacultiesTable', () => {
   const faculties = Array.from({ length: 10 }, (_, index) => ({
@@ -36,6 +40,14 @@ describe('FacultiesTable', () => {
       expect(
         screen.getByText('Belum ada fakultas yang ditambahkan'),
       ).toBeVisible()
+    })
+
+    it('should shows each faculty actions', () => {
+      render(<FacultiesTable faculties={faculties} />)
+
+      for (var f of faculties) {
+        expect(screen.getByRole('button', { name: new RegExp(f.name, 'i') }))
+      }
     })
   })
 })

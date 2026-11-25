@@ -11,7 +11,12 @@ vi.mock('@/lib/faculties/faculties.action', () => ({
 }))
 
 vi.mock('@/lib/faculties/faculties.query', () => ({
-  getFacultiesQuery: vi.fn(),
+  getFacultiesQuery: vi.fn().mockResolvedValue({
+    data: {
+      data: [],
+      pagination: { page: 1, pageSize: 5, total: 0 },
+    },
+  }),
 }))
 
 describe('FacultyForm', () => {

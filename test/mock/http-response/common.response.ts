@@ -3,9 +3,9 @@ import type {
   PaginatedHTTPResponse,
 } from '@/lib/common/http-client/common.http-client'
 
-export type HTTPStatus = 200 | 201 | 401 | 403 | 422 | 500
+export type HTTPStatus = 200 | 201 | 204 | 401 | 403 | 422 | 500
 
-export type HTTPMethod = 'GET' | 'POST' | 'PUT'
+export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
 type HTTPResponseMock<TData> = Partial<
   Record<HTTPStatus, HTTPResponse<TData> | PaginatedHTTPResponse<TData>>

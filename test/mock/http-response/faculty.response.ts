@@ -11,7 +11,7 @@ type Faculty = {
   name: string
 }
 
-type FacultyEndpoint = '/faculties'
+type FacultyEndpoint = '/faculties' | '/faculties/id'
 
 const facultyResponse: HTTPEndpointResponseMock<FacultyEndpoint, Faculty> = {
   '/faculties': {
@@ -46,6 +46,22 @@ const facultyResponse: HTTPEndpointResponseMock<FacultyEndpoint, Faculty> = {
           pageSize: 5,
           total: 5,
         },
+      },
+      401: {
+        status: 401,
+        error: {
+          title: 'Provided credential is invalid',
+          detail: 'Email/password/both is invalid. Please check again',
+        },
+      },
+      500: internalError,
+    },
+  },
+  '/faculties/id': {
+    DELETE: {
+      204: {
+        status: 204,
+        data: null,
       },
       401: {
         status: 401,
