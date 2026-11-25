@@ -1,4 +1,3 @@
-import 'client-only'
 import type { HTTPClient } from '../common/http-client/common.http-client'
 import { getLogger } from '../common/logger'
 import type { PaginatedData } from '../common/pagination'
