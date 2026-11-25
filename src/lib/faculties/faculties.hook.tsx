@@ -63,19 +63,24 @@ export function useFaculties(
     mutationFn: async (args: CreateFacultyRequest) => {
       return createFacultyAction(args)
     },
-    onSettled: (data, error, variables) => {
-      if (!effect?.onCreateSettled) return
-      if (data) {
-        effect.onCreateSettled(variables, data)
-      }
-      if (error) {
-        effect.onCreateSettled(variables, {
-          error: {
-            status: 500,
-            title: 'Internal error',
-            detail: `${error}`,
-          },
+    onSettled: async (data, error, variables) => {
+      if (data && !data.error) {
+        await queryClient.invalidateQueries({
+          queryKey: ['faculties'],
         })
+        if (!effect?.onCreateSettled) return
+        if (data) {
+          effect.onCreateSettled(variables, data)
+        }
+        if (error) {
+          effect.onCreateSettled(variables, {
+            error: {
+              status: 500,
+              title: 'Internal error',
+              detail: `${error}`,
+            },
+          })
+        }
       }
     },
   })
@@ -93,7 +98,12 @@ export function useFaculties(
     mutationFn: (faculty: Faculty) => {
       return deleteFacultyAction(faculty.id)
     },
-    onSettled: (data, error, variables) => {
+    onSettled: async (data, error, variables) => {
+      if (data && !data.error) {
+        await queryClient.invalidateQueries({
+          queryKey: ['faculties'],
+        })
+      }
       if (!effect?.onDeleteSettled) return
       if (data) {
         effect.onDeleteSettled(variables, data)
@@ -119,24 +129,10 @@ export function useFaculties(
 
   return {
     faculties: data?.data ?? null,
-    error: data?.error ?? null,
+    error: isFetching ? null : (data?.error ?? null),
     isLoading: isFetching,
-    getFaculties: async (force: boolean = false) => {
-      if (force) {
-        await refetch()
-        return
-      }
-      await queryClient.query({
-        queryKey: ['faculties'],
-        queryFn: async () => {
-          const result = await getFacultiesQuery(httpClient)
-          if (result.error) {
-            throw result.error
-          }
-          return result
-        },
-        initialData: initialState,
-      })
+    refresh: () => {
+      void refetch()
     },
     createFaculty,
     pendingCreation,

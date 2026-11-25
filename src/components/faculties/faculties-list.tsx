@@ -23,7 +23,7 @@ type FacultiesListProps = {
 
 export default function FacultiesList({ initial }: FacultiesListProps) {
   const router = useRouter()
-  const { faculties, error, isLoading, getFaculties } = useFaculties(initial)
+  const { faculties, error, isLoading, refresh } = useFaculties(initial)
 
   useEffect(() => {
     if (error?.status !== 401) return
@@ -45,13 +45,7 @@ export default function FacultiesList({ initial }: FacultiesListProps) {
           <EmptyDescription>{error.detail}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button
-            onClick={() => {
-              void getFaculties(true)
-            }}
-          >
-            Coba lagi
-          </Button>
+          <Button onClick={refresh}>Coba lagi</Button>
         </EmptyContent>
       </Empty>
     )

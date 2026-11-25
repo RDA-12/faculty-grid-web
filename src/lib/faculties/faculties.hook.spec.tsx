@@ -2,11 +2,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { useFaculties } from './faculties.hook'
 import type { PaginatedData } from '../common/pagination'
 import type { Faculty } from './faculty.types'
-import { getFacultiesQuery } from './faculties.query'
+import {
+  getFacultiesQuery,
+  type GetFacultiesQueryResult,
+} from './faculties.query'
 import { act, waitFor } from '@testing-library/react'
 import { internalError } from '../../../test/mock/http-response/common.response'
 import { renderHook } from '../../../test/rtl-helper'
-import { DEFAULT_STALE_TIME } from '../common/config'
 import { createFacultyAction, deleteFacultyAction } from './faculties.action'
 import type { CreateFacultyRequest } from './faculties.schema'
 import type { ActionState } from '../common/types'
@@ -71,55 +73,48 @@ describe('FacultiesHook', () => {
       expect(getFacultiesQuery).not.toHaveBeenCalled()
     })
 
-    describe('getFaculties', () => {
-      it('should runs getFacultiesQuery when initialState is empty', async () => {
-        const { result } = renderHook(() => useFaculties())
+    it('should runs getFacultiesQuery when initialState is empty', async () => {
+      const { result } = renderHook(() => useFaculties())
 
-        expect(getFacultiesQuery).toHaveBeenCalledOnce()
-        await waitFor(() => expect(result.current.faculties).toBeTruthy())
-      })
+      expect(getFacultiesQuery).toHaveBeenCalledOnce()
+      await waitFor(() => expect(result.current.faculties).toBeTruthy())
+    })
 
-      it('should set isLoading to true and error to null when getFaculties invoked', async () => {
-        // Auto invoked getFaculties
-        const { result } = renderHook(() => useFaculties())
-        expect(getFacultiesQuery).toHaveBeenCalledOnce()
+    describe('refresh', () => {
+      it('should set isLoading to true and error to null when refresh invoked', async () => {
+        let resolve: (v: GetFacultiesQueryResult) => void
+        vi.mocked(getFacultiesQuery).mockImplementationOnce(
+          () =>
+            new Promise((r) => {
+              resolve = r
+            }),
+        )
+        const { result } = renderHook(() =>
+          useFaculties({ error: { status: 500, ...internalError.error } }),
+        )
+        await waitFor(() => expect(result.current.isLoading).toBeFalsy())
+        await waitFor(() => expect(result.current.error).toBeTruthy())
+
+        result.current.refresh()
 
         await waitFor(() => expect(result.current.isLoading).toBeTruthy())
         await waitFor(() => expect(result.current.error).toBeFalsy())
+
+        await act(async () => {
+          resolve({ data: faculties })
+        })
+
+        await waitFor(() => expect(result.current.isLoading).toBeFalsy())
+        await waitFor(() => expect(result.current.error).toBeFalsy())
       })
 
-      it('should return cached data when getFaculties invoked within staletime', async () => {
+      it('should calls getFacultiesQuery once', async () => {
         const { result } = renderHook(() => useFaculties())
         await waitFor(() => expect(result.current.faculties).toBeTruthy())
 
-        await act(async () => {
-          await result.current.getFaculties()
-        })
-        await waitFor(() => expect(getFacultiesQuery).toHaveBeenCalledOnce())
-      })
+        result.current.refresh()
 
-      it('should call getFacultiesQuery again after stale time has passed', async () => {
-        const { result } = renderHook(() => useFaculties())
-        await waitFor(() => expect(result.current.faculties).toBeTruthy())
-
-        await act(async () => {
-          await result.current.getFaculties()
-        })
-        expect(getFacultiesQuery).toHaveBeenCalledOnce()
-
-        vi.useFakeTimers()
-
-        await act(async () => {
-          await vi.advanceTimersByTimeAsync(DEFAULT_STALE_TIME + 1000)
-        })
-
-        await act(async () => {
-          await result.current.getFaculties()
-        })
-
-        expect(getFacultiesQuery).toHaveBeenCalledTimes(2)
-
-        vi.useRealTimers()
+        await waitFor(() => expect(getFacultiesQuery).toHaveBeenCalledTimes(2))
       })
 
       it('should set error when getFacultiesQuery failed', async () => {
@@ -239,6 +234,14 @@ describe('FacultiesHook', () => {
           expect(result.current.pendingCreation.length).toBe(0),
         )
       })
+
+      it('should call getFacultiesQuery once when success', async () => {
+        const { result } = renderHook(() => useFaculties({ data: faculties }))
+
+        result.current.createFaculty({ name: 'new name' })
+
+        await waitFor(() => expect(getFacultiesQuery).toHaveBeenCalledOnce())
+      })
     })
 
     describe('deleteFaculty', () => {
@@ -331,6 +334,14 @@ describe('FacultiesHook', () => {
       })
 
       await waitFor(() => expect(result.current.pendingDeletion.length).toBe(0))
+    })
+
+    it('should call getFacultiesQuery once when success', async () => {
+      const { result } = renderHook(() => useFaculties({ data: faculties }))
+
+      result.current.deleteFaculty(faculties.data[0])
+
+      await waitFor(() => expect(getFacultiesQuery).toHaveBeenCalledOnce())
     })
   })
 })
