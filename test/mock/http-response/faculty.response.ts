@@ -61,7 +61,7 @@ const facultyResponse: HTTPEndpointResponseMock<FacultyEndpoint, Faculty> = {
     DELETE: {
       204: {
         status: 204,
-        data: null,
+        data: undefined,
       },
       401: {
         status: 401,

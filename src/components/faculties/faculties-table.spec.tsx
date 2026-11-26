@@ -16,18 +16,6 @@ import { internalError } from '../../../test/mock/http-response/common.response'
 vi.mock('@/lib/faculties/faculties.action', () => ({
   deleteFacultyAction: vi.fn(),
 }))
-vi.mock('@/lib/faculties/faculties.query', () => ({
-  getFacultiesQuery: vi.fn().mockResolvedValue({
-    data: {
-      data: [],
-      pagination: {
-        page: 1,
-        pageSize: 10,
-        total: 0,
-      },
-    },
-  }),
-}))
 
 describe('FacultiesTable', () => {
   const faculties = Array.from({ length: 10 }, (_, index) => ({

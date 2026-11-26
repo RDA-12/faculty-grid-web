@@ -7,13 +7,13 @@ import {
 } from '../../../test/rtl-helper'
 import FacultyActions from './faculty-actions'
 import type { Faculty } from '@/lib/faculties/faculty.types'
-import { useFaculties } from '@/lib/faculties/faculties.hook'
+import { useDeleteFaculty } from '@/lib/faculties/faculties.hook'
 
 vi.mock('@/lib/faculties/faculties.action', () => ({
   deleteFacultyAction: vi.fn(),
 }))
 vi.mock('@/lib/faculties/faculties.hook', () => ({
-  useFaculties: vi.fn().mockImplementation(() => ({
+  useDeleteFaculty: vi.fn().mockImplementation(() => ({
     pendingDeletion: [],
   })),
 }))
@@ -72,12 +72,12 @@ describe('FacultyActions', () => {
       expect(screen.getByRole('menuitem', { name: /hapus/i })).toBeVisible()
     })
 
-    it('should disabled and shows placeholder when the faculty is in pendingDeletion list of useFaculties', async () => {
-      vi.mocked(useFaculties).mockImplementationOnce(
+    it('should disabled and shows placeholder when the faculty is in pendingDeletion list of useDeleteFaculty', async () => {
+      vi.mocked(useDeleteFaculty).mockImplementationOnce(
         () =>
           ({
             pendingDeletion: [faculty],
-          }) as unknown as ReturnType<typeof useFaculties>,
+          }) as unknown as ReturnType<typeof useDeleteFaculty>,
       )
       render(<FacultyActions faculty={faculty} />)
 

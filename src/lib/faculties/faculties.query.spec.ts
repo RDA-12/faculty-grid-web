@@ -51,16 +51,23 @@ describe('FacultiesQuery', () => {
       })
     })
 
-    it('should call correct endpoint and params', async () => {
+    it('should call correct endpoint', async () => {
       await getFacultiesQuery(httpClient)
 
       expect(httpClient.get).toHaveBeenCalledExactlyOnceWith(
         '/faculties',
         {},
-        {
-          page: 1,
-          pageSize: 10,
-        },
+        {},
+      )
+    })
+
+    it('should call correct endpoint with params', async () => {
+      await getFacultiesQuery(httpClient, { search: 'lol' })
+
+      expect(httpClient.get).toHaveBeenCalledExactlyOnceWith(
+        '/faculties',
+        {},
+        { search: 'lol' },
       )
     })
   })

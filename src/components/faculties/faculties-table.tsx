@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '../ui/table'
 import FacultiesAction from './faculty-actions'
-import { useFaculties } from '@/lib/faculties/faculties.hook'
+import { useDeleteFaculty } from '@/lib/faculties/faculties.hook'
 import { toast } from 'sonner'
 import { useRef } from 'react'
 import {
@@ -63,21 +63,16 @@ type FacultiesTableProps = {
 export default function FacultiesTable({ faculties }: FacultiesTableProps) {
   // Track faculty id to its loading toast id
   const pendingDeletionRecord = useRef<Record<string, string | number>>({})
-  const { deleteFaculty } = useFaculties(
-    {},
-    {
-      onDeleteSettled(faculty, data) {
-        const loadingToastId = pendingDeletionRecord.current[faculty.id]
-        toast.dismiss(loadingToastId)
-        if (data.data) {
-          toast.success(`${faculty.name} berhasil dihapus`)
-        }
-        if (data.error) {
-          toast.error(data.error.title, { description: data.error.detail })
-        }
-      },
-    },
-  )
+  const { deleteFaculty } = useDeleteFaculty((faculty, data) => {
+    const loadingToastId = pendingDeletionRecord.current[faculty.id]
+    toast.dismiss(loadingToastId)
+    if (data.data) {
+      toast.success(`${faculty.name} berhasil dihapus`)
+    }
+    if (data.error) {
+      toast.error(data.error.title, { description: data.error.detail })
+    }
+  })
 
   const facultyDeleteDialogController = useFacultyDeleteDialog({
     onDeleted(f) {

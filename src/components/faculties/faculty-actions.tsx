@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 import type { Faculty } from '@/lib/faculties/faculty.types'
-import { useFaculties } from '@/lib/faculties/faculties.hook'
+import { useDeleteFaculty } from '@/lib/faculties/faculties.hook'
 
 type FacultyActionsProps = {
   faculty: Faculty
@@ -28,7 +28,7 @@ export default function FacultyActions({
   faculty,
   onDeleteClicked,
 }: FacultyActionsProps) {
-  const { pendingDeletion } = useFaculties()
+  const { pendingDeletion } = useDeleteFaculty()
   const isDeleting = pendingDeletion.includes(faculty)
 
   return (

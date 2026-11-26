@@ -12,7 +12,7 @@ import {
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { Spinner } from '../ui/spinner'
-import { useFaculties } from '@/lib/faculties/faculties.hook'
+import { useCreateFaculty } from '@/lib/faculties/faculties.hook'
 import { CreateFacultySchema } from '@/lib/faculties/faculties.schema'
 import { toast } from 'sonner'
 
@@ -20,26 +20,21 @@ import { toast } from 'sonner'
  * Creates Fieldset consists of Fields to create new faculty
  */
 export default function FacultyForm() {
-  const { createFaculty, pendingCreation } = useFaculties(
-    {},
-    {
-      onCreateSettled(_args, data) {
-        if (data.error) {
-          toast.error(data.error.title, {
-            description: data.error.detail,
-            duration: Infinity,
-            position: 'top-center',
-          })
-        }
-        if (data.data) {
-          toast.success(`${data.data.name} berhasil dibuat`, {
-            duration: Infinity,
-            position: 'top-center',
-          })
-        }
-      },
-    },
-  )
+  const { createFaculty, pendingCreation } = useCreateFaculty((_args, data) => {
+    if (data.error) {
+      toast.error(data.error.title, {
+        description: data.error.detail,
+        duration: Infinity,
+        position: 'top-center',
+      })
+    }
+    if (data.data) {
+      toast.success(`${data.data.name} berhasil dibuat`, {
+        duration: Infinity,
+        position: 'top-center',
+      })
+    }
+  })
   const {
     register,
     handleSubmit,
