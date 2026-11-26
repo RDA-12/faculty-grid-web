@@ -1,15 +1,28 @@
 export const instant = false
 
 import PageScaffold from '@/components/common/page-scaffold'
-import AddFacultyButton from '@/components/faculties/add-faculty-button'
 import FacultiesList from '@/components/faculties/faculties-list'
+import FacultiesSearchBar from '@/components/faculties/faculties-search-bar'
 import httpClient from '@/lib/common/http-client/http-client.server'
 import { getFacultiesQuery } from '@/lib/faculties/faculties.query'
 import { connection } from 'next/server'
 
-export default async function FacultiesListPage() {
+export default async function FacultiesListPage(
+  props: PageProps<'/dashboard/faculties'>,
+) {
   await connection()
-  const result = await getFacultiesQuery(httpClient)
+  const searchParams = (await props.searchParams) as Record<
+    string,
+    string | undefined
+  >
+  const params = {
+    search: searchParams['search'] ?? undefined,
+    page: searchParams['page'] ? Number(searchParams['page']) : undefined,
+    pageSize: searchParams['pageSize']
+      ? Number(searchParams['pageSize'])
+      : undefined,
+  }
+  const result = await getFacultiesQuery(httpClient, params)
 
   return (
     <PageScaffold
@@ -27,9 +40,10 @@ export default async function FacultiesListPage() {
       ]}
     >
       <main className="flex flex-col gap-4">
-        <AddFacultyButton />
+        <FacultiesSearchBar />
         <FacultiesList
           initial={result.error?.status === 401 ? undefined : result}
+          params={params}
         />
       </main>
     </PageScaffold>

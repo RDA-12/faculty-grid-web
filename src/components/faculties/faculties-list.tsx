@@ -16,14 +16,16 @@ import type { GetFacultiesQueryResult } from '@/lib/faculties/faculties.query'
 import { useFaculties } from '@/lib/faculties/faculties.hook'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import type { FacultiesQueryParams } from '@/lib/faculties/faculties.schema'
 
 type FacultiesListProps = {
   initial?: GetFacultiesQueryResult
+  params?: FacultiesQueryParams
 }
 
-export default function FacultiesList({ initial }: FacultiesListProps) {
+export default function FacultiesList({ initial, params }: FacultiesListProps) {
   const router = useRouter()
-  const { faculties, error, isLoading, refresh } = useFaculties(initial)
+  const { faculties, error, isLoading, refresh } = useFaculties(initial, params)
 
   useEffect(() => {
     if (error?.status !== 401) return
