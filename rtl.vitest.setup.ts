@@ -1,8 +1,11 @@
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { afterEach, vi } from 'vitest'
+import { toast } from 'sonner'
 
 afterEach(() => {
+  toast.dismiss()
+  vi.clearAllMocks()
   cleanup()
 })
 

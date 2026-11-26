@@ -1,25 +1,73 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, render, screen, waitFor, within } from '../../../test/rtl-helper'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { act, render, renderHook, screen } from '../../../test/rtl-helper'
 import {
   FacultyActionDeleteDialog,
+  useFacultyDeleteDialog,
   type FacultyActionDeleteDialogController,
 } from './faculty-action-dialog'
 import type { Faculty } from '@/lib/faculties/faculty.types'
-import { deleteFacultyAction } from '@/lib/faculties/faculties.action'
-import type { ActionState } from '@/lib/common/types'
-import { internalError } from '../../../test/mock/http-response/common.response'
-import { useFaculties } from '@/lib/faculties/faculties.hook'
 
-vi.mock('@/lib/faculties/faculties.action', () => ({
-  deleteFacultyAction: vi.fn().mockResolvedValue({
-    data: true,
-  }),
-}))
-vi.mock('@/lib/faculties/faculties.hook', () => ({
-  useFaculties: vi.fn().mockReturnValue({
-    getFaculties: vi.fn(),
-  }),
-}))
+describe('useFacultyDeleteDialog', () => {
+  const faculty: Faculty = {
+    id: 'id',
+    name: 'name',
+  }
+
+  it('should set faculty and isOpen when open is called', () => {
+    const { result } = renderHook(() => useFacultyDeleteDialog())
+
+    act(() => {
+      result.current.open(faculty)
+    })
+
+    expect(result.current.isOpen).toBeTruthy()
+    expect(result.current.faculty).toStrictEqual(faculty)
+  })
+
+  it('should set faculty to null and isOpen to false when close is called', () => {
+    const { result } = renderHook(() => useFacultyDeleteDialog())
+
+    act(() => {
+      result.current.open(faculty)
+    })
+
+    expect(result.current.isOpen).toBeTruthy()
+    expect(result.current.faculty).toStrictEqual(faculty)
+
+    act(() => {
+      result.current.close(false)
+    })
+
+    expect(result.current.isOpen).toBeFalsy()
+    expect(result.current.faculty).toBeNull()
+  })
+
+  it('should calls onDeleted when it close with onDeleted provided', () => {
+    let deleted: Faculty | undefined
+    const { result } = renderHook(() =>
+      useFacultyDeleteDialog({
+        onDeleted(f) {
+          deleted = f
+        },
+      }),
+    )
+
+    act(() => {
+      result.current.open(faculty)
+    })
+
+    expect(result.current.isOpen).toBeTruthy()
+    expect(result.current.faculty).toStrictEqual(faculty)
+
+    act(() => {
+      result.current.close(true)
+    })
+
+    expect(result.current.isOpen).toBeFalsy()
+    expect(result.current.faculty).toBeNull()
+    expect(deleted).toStrictEqual(faculty)
+  })
+})
 
 describe('FacultyActionDialog', () => {
   const faculty: Faculty = {
@@ -38,10 +86,6 @@ describe('FacultyActionDialog', () => {
       close: vi.fn(),
       faculty: faculty,
     }
-
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
 
     describe('Render', () => {
       it('should shows correct title', () => {
@@ -73,10 +117,20 @@ describe('FacultyActionDialog', () => {
 
         expect(screen.getByRole('button', { name: /hapus/i })).toBeVisible()
       })
+
+      it('should not render dialog when closed', async () => {
+        render(
+          <FacultyActionDeleteDialog
+            controller={{ ...controller, isOpen: false }}
+          />,
+        )
+
+        expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+      })
     })
 
     describe('Interactions', () => {
-      it('should call close on controller without calling deleteFacultyAction when cancel button is pressed', async () => {
+      it('should call close on controller when cancel button is pressed', async () => {
         const { user } = render(
           <FacultyActionDeleteDialog controller={controller} />,
         )
@@ -84,10 +138,9 @@ describe('FacultyActionDialog', () => {
         expect(screen.getByRole('alertdialog')).toBeVisible()
         await user.click(screen.getByRole('button', { name: /batalkan/i }))
         expect(controller.close).toHaveBeenCalledOnce()
-        expect(deleteFacultyAction).not.toHaveBeenCalled()
       })
 
-      it('should call close on controller with calling deleteFacultyAction when cancel button is pressed', async () => {
+      it('should call close on controller when delete button is pressed', async () => {
         const { user } = render(
           <FacultyActionDeleteDialog controller={controller} />,
         )
@@ -95,106 +148,6 @@ describe('FacultyActionDialog', () => {
         expect(screen.getByRole('alertdialog')).toBeVisible()
         await user.click(screen.getByRole('button', { name: /hapus/i }))
         expect(controller.close).toHaveBeenCalledOnce()
-        expect(deleteFacultyAction).toHaveBeenCalledExactlyOnceWith(
-          {},
-          faculty.id,
-        )
-      })
-    })
-
-    describe('Side Effects', () => {
-      it('shows loading toast when starting delete faculty process', async () => {
-        let resolve!: (v: ActionState<string, boolean>) => void
-        vi.mocked(deleteFacultyAction).mockImplementationOnce(
-          () =>
-            new Promise((r) => {
-              resolve = r
-            }),
-        )
-
-        const { user } = render(
-          <FacultyActionDeleteDialog controller={controller} />,
-        )
-
-        await user.click(screen.getByRole('button', { name: /hapus/i }))
-
-        expect(
-          screen.getByRole('region', { name: /notifications/i }),
-        ).toBeVisible()
-        expect(
-          within(
-            screen.getByRole('region', { name: /notifications/i }),
-          ).getByText(`Menghapus ${faculty.name}...`),
-        ).toBeVisible()
-
-        await act(async () => {
-          resolve({ data: true })
-        })
-      })
-
-      it('shows success toast when delete faculty success', async () => {
-        const { user } = render(
-          <FacultyActionDeleteDialog controller={controller} />,
-        )
-
-        await user.click(screen.getByRole('button', { name: /hapus/i }))
-
-        expect(
-          screen.getByRole('region', { name: /notifications/i }),
-        ).toBeVisible()
-        await waitFor(() =>
-          expect(
-            within(
-              screen.getByRole('region', { name: /notifications/i }),
-            ).getByText(`${faculty.name} berhasil dihapus`),
-          ).toBeVisible(),
-        )
-      })
-
-      it('shows error toast when delete faculty failed', async () => {
-        vi.mocked(deleteFacultyAction).mockResolvedValueOnce({
-          error: {
-            status: 500,
-            ...internalError.error,
-          },
-        })
-
-        const { user } = render(
-          <FacultyActionDeleteDialog controller={controller} />,
-        )
-
-        await user.click(screen.getByRole('button', { name: /hapus/i }))
-
-        expect(
-          screen.getByRole('region', { name: /notifications/i }),
-        ).toBeVisible()
-        await waitFor(() => {
-          expect(
-            within(
-              screen.getByRole('region', { name: /notifications/i }),
-            ).getByText(`${internalError.error.title}`),
-          ).toBeVisible()
-          expect(
-            within(
-              screen.getByRole('region', { name: /notifications/i }),
-            ).getByText(`${internalError.error.detail}`),
-          ).toBeVisible()
-        })
-      })
-
-      it('should calls getfaculties when delete faculty success', async () => {
-        const getFacultiesMock = vi.fn().mockResolvedValue({})
-        vi.mocked(useFaculties).mockReturnValue({
-          getFaculties: getFacultiesMock,
-        } as unknown as ReturnType<typeof useFaculties>)
-
-        const { user } = render(
-          <FacultyActionDeleteDialog controller={controller} />,
-        )
-
-        await user.click(screen.getByRole('button', { name: /hapus/i }))
-
-        await waitFor(() => expect(getFacultiesMock).toHaveBeenCalledOnce())
       })
     })
   })

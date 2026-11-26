@@ -1,6 +1,7 @@
 import { ISettingsParam, Logger } from 'tslog'
 
 const root = new Logger({
+  type: process.env.NODE_ENV === 'test' ? 'hidden' : 'pretty',
   name: 'FacultyGrid',
   pretty: {
     template: '[{{dateIsoStr}}] [{{logLevelName}}] [{{name}}] ',

@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/ui/theme-provider'
 import AppQueryClientProvider from '@/components/root/query-client-provider'
+import { DEFAULT_TOAST_DURATION } from '@/lib/common/config'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
@@ -29,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
             disableTransitionOnChange
           >
             {children}
-            <Toaster />
+            <Toaster duration={DEFAULT_TOAST_DURATION} />
           </ThemeProvider>
         </AppQueryClientProvider>
       </body>

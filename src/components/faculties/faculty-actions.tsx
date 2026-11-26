@@ -12,13 +12,11 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 import type { Faculty } from '@/lib/faculties/faculty.types'
-import {
-  FacultyActionDeleteDialog,
-  useFacultyDeleteDialog,
-} from './faculty-action-dialog'
+import { useFaculties } from '@/lib/faculties/faculties.hook'
 
 type FacultyActionsProps = {
   faculty: Faculty
+  onDeleteClicked?: () => void
 }
 
 /**
@@ -26,8 +24,12 @@ type FacultyActionsProps = {
  *
  * Its meant to be used as actions row in FacultiesTable
  */
-export default function FacultyActions({ faculty }: FacultyActionsProps) {
-  const controller = useFacultyDeleteDialog(faculty)
+export default function FacultyActions({
+  faculty,
+  onDeleteClicked,
+}: FacultyActionsProps) {
+  const { pendingDeletion } = useFaculties()
+  const isDeleting = pendingDeletion.includes(faculty)
 
   return (
     <>
@@ -37,8 +39,13 @@ export default function FacultyActions({ faculty }: FacultyActionsProps) {
             variant="ghost"
             className="h-8 w-8 p-0"
             aria-label={`Aksi ${faculty.name}`}
+            disabled={isDeleting}
           >
-            <MoreHorizontal className="h-4 w-4" data-testid="moreIcon" />
+            {isDeleting ? (
+              'Menghapus...'
+            ) : (
+              <MoreHorizontal className="h-4 w-4" data-testid="moreIcon" />
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -55,20 +62,13 @@ export default function FacultyActions({ faculty }: FacultyActionsProps) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => {
-                controller.open()
-              }}
-            >
+            <DropdownMenuItem variant="destructive" onClick={onDeleteClicked}>
               <TrashIcon />
               Hapus
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <FacultyActionDeleteDialog controller={controller} />
     </>
   )
 }

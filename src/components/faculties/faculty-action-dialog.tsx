@@ -13,16 +13,39 @@ import {
   AlertDialogTitle,
 } from '../ui/alert-dialog'
 import { Trash2Icon } from 'lucide-react'
-import {
-  startTransition,
-  useActionState,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
-import { deleteFacultyAction } from '@/lib/faculties/faculties.action'
-import { toast } from 'sonner'
-import { useFaculties } from '@/lib/faculties/faculties.hook'
+import { useCallback, useState } from 'react'
+
+type UseFacultyDeleteDialogProps = {
+  /**
+   * Fired when dialog close by delete button
+   *
+   * NOTE: DO NOT update state within this callback
+   */
+  onDeleted?: (f: Faculty) => void
+}
+
+export function useFacultyDeleteDialog(props?: UseFacultyDeleteDialogProps) {
+  const [faculty, setFaculty] = useState<Faculty | null>(null)
+  const [isOpen, setIsOpen] = useState(false)
+
+  const close = useCallback(
+    (isDeleted: boolean) => {
+      if (isDeleted && props?.onDeleted && faculty) {
+        props.onDeleted(faculty)
+      }
+      setIsOpen(false)
+      setFaculty(null)
+    },
+    [props, faculty],
+  )
+
+  const open = useCallback((faculty: Faculty) => {
+    setIsOpen(true)
+    setFaculty(faculty)
+  }, [])
+
+  return { isOpen, open, close, faculty }
+}
 
 type FacultyActionDialogProps = {
   controller: FacultyActionDeleteDialogController
@@ -32,23 +55,6 @@ export type FacultyActionDeleteDialogController = ReturnType<
   typeof useFacultyDeleteDialog
 >
 
-export function useFacultyDeleteDialog(
-  faculty: Faculty,
-  args?: { initialOpen?: boolean },
-) {
-  const [isOpen, setIsOpen] = useState(args?.initialOpen ?? false)
-
-  const close = useCallback(() => {
-    setIsOpen(false)
-  }, [])
-
-  const open = useCallback(() => {
-    setIsOpen(true)
-  }, [])
-
-  return { isOpen, open, close, faculty }
-}
-
 /**
  * Creates a AlertDialog which also handle faculty deletion using
  * deleteFacultyAction
@@ -56,34 +62,16 @@ export function useFacultyDeleteDialog(
 export function FacultyActionDeleteDialog({
   controller,
 }: FacultyActionDialogProps) {
-  const [state, action, isPending] = useActionState(deleteFacultyAction, {})
-  const { faculty, isOpen, open, close } = controller
-  const { getFaculties } = useFaculties()
+  const { faculty, isOpen, close } = controller
 
-  useEffect(() => {
-    if (!isPending) return
-    toast.loading(`Menghapus ${faculty.name}...`)
-  }, [isPending, faculty.name])
-  useEffect(() => {
-    toast.dismiss()
-    if (state.error) {
-      toast.error(state.error.title, { description: state.error.detail })
-    }
-    if (state.data) {
-      toast.success(`${faculty.name} berhasil dihapus`)
-      void getFaculties(true)
-    }
-  }, [state, faculty.name, getFaculties])
+  if (!faculty) return
 
   return (
     <AlertDialog
       open={isOpen}
       onOpenChange={(isOpen) => {
-        if (isOpen) {
-          open()
-        } else {
-          close()
-        }
+        if (isOpen) return
+        close(false)
       }}
     >
       <AlertDialogContent size="sm">
@@ -102,10 +90,9 @@ export function FacultyActionDeleteDialog({
           <AlertDialogCancel variant={'ghost'}>Batalkan</AlertDialogCancel>
           <AlertDialogAction
             variant={'destructive'}
-            onClick={() => {
-              startTransition(() => {
-                action(faculty.id)
-              })
+            onClick={(e) => {
+              e.preventDefault()
+              close(true)
             }}
           >
             Hapus
