@@ -3,6 +3,7 @@ import {
   act,
   render,
   screen,
+  waitFor,
   within,
   type UserEvent,
 } from '../../../test/rtl-helper'
@@ -110,8 +111,8 @@ describe('FacultyForm', () => {
       await clickSubmit(user)
 
       const regionEL = screen.getByRole('region', { name: /notifications/i })
-      expect(within(regionEL).getByText('Error title')).toBeVisible()
-      expect(within(regionEL).getByText('Error detail')).toBeVisible()
+      await waitFor(() => expect(within(regionEL).getByText('Error title')).toBeVisible())
+      await waitFor(() => expect(within(regionEL).getByText('Error detail')).toBeVisible())
     })
 
     it('should shows success toast when createFacultyAction is success', async () => {
@@ -127,11 +128,11 @@ describe('FacultyForm', () => {
       await inputName(user, 'fakultas')
       await clickSubmit(user)
 
-      expect(
+      await waitFor(() => expect(
         within(
           screen.getByRole('region', { name: /notifications/i }),
         ).getByText('Fakultas baru berhasil dibuat'),
-      ).toBeVisible()
+      ).toBeVisible())
     })
   })
 
