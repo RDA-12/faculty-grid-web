@@ -1,5 +1,11 @@
 import { ActionState } from '@/lib/common/types'
-import { act, render, screen, type UserEvent } from '../../../test/rtl-helper'
+import {
+  act,
+  render,
+  screen,
+  waitFor,
+  type UserEvent,
+} from '../../../test/rtl-helper'
 import LoginForm from './login-form'
 import { loginAction } from '@/lib/auth/auth.action'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -117,8 +123,12 @@ describe('LoginForm', () => {
 
       await clickSubmit(user)
 
-      expect(screen.getByText('Invalid email')).toBeVisible()
-      expect(screen.getByText('Invalid password')).toBeVisible()
+      await waitFor(() =>
+        expect(screen.getByText('Invalid email')).toBeVisible(),
+      )
+      await waitFor(() =>
+        expect(screen.getByText('Invalid password')).toBeVisible(),
+      )
     })
 
     it('should shows error toast when login is failed', async () => {
