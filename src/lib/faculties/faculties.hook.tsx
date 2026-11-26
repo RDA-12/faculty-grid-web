@@ -68,19 +68,19 @@ export function useFaculties(
         await queryClient.invalidateQueries({
           queryKey: ['faculties'],
         })
-        if (!effect?.onCreateSettled) return
-        if (data) {
-          effect.onCreateSettled(variables, data)
-        }
-        if (error) {
-          effect.onCreateSettled(variables, {
-            error: {
-              status: 500,
-              title: 'Internal error',
-              detail: `${error}`,
-            },
-          })
-        }
+      }
+      if (!effect?.onCreateSettled) return
+      if (data) {
+        effect.onCreateSettled(variables, data)
+      }
+      if (error) {
+        effect.onCreateSettled(variables, {
+          error: {
+            status: 500,
+            title: 'Internal error',
+            detail: `${error}`,
+          },
+        })
       }
     },
   })
