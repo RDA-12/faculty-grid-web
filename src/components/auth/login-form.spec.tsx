@@ -28,7 +28,7 @@ describe('LoginForm', () => {
   }
 
   async function inputPassword(user: UserEvent, password: string) {
-    const inputEl = screen.getByLabelText(/password/i)
+    const inputEl = screen.getByLabelText('Password')
 
     await user.type(inputEl, password)
 
@@ -50,10 +50,28 @@ describe('LoginForm', () => {
     it('should shows password field', () => {
       render(<LoginForm />)
 
-      const inputEl = screen.getByLabelText(/password/i)
+      const inputEl = screen.getByLabelText('Password')
       expect(inputEl).toBeVisible()
       expect(inputEl).toHaveAttribute('type', 'password')
       expect(screen.getByText('Password')).toBeVisible()
+    })
+
+    it('should shows hide password button when password is not showed', () => {
+      render(<LoginForm />)
+
+      expect(
+        screen.getByRole('button', { name: /lihat password/i }),
+      ).toBeVisible()
+    })
+
+    it('should shows hide password button when password is showed', async () => {
+      const { user } = render(<LoginForm />)
+
+      await user.click(screen.getByRole('button', { name: /lihat password/i }))
+
+      expect(
+        screen.getByRole('button', { name: /tutup password/i }),
+      ).toBeVisible()
     })
 
     it('should shows login button', () => {
@@ -149,6 +167,29 @@ describe('LoginForm', () => {
       expectedFormData.append('email', 'email@email.com')
       expectedFormData.append('password', 'password')
       expect(loginAction).toHaveBeenCalledExactlyOnceWith({}, expectedFormData)
+    })
+
+    it('allows users to show/hide password', async () => {
+      const { user } = render(<LoginForm />)
+
+      const inputEl = screen.getByLabelText('Password')
+      expect(inputEl).toHaveProperty('type', 'password')
+      expect(
+        screen.getByRole('button', { name: /lihat password/i }),
+      ).toBeVisible()
+      expect(
+        screen.queryByRole('button', { name: /tutup password/i }),
+      ).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: /lihat password/i }))
+
+      expect(inputEl).toHaveProperty('type', 'text')
+      expect(
+        screen.queryByRole('button', { name: /lihat password/i }),
+      ).not.toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /tutup password/i }),
+      ).toBeVisible()
     })
   })
 })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import {
   Field,
@@ -13,11 +13,19 @@ import { Input } from '../ui/input'
 import { loginAction } from '@/lib/auth/auth.action'
 import { Spinner } from '../ui/spinner'
 import { toast } from 'sonner'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '../ui/input-group'
+import { Eye, EyeClosed } from 'lucide-react'
 
 /**
  * Creates a FieldSet consists of email and password Field
  */
 export default function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false)
   const [state, action, isPending] = useActionState(loginAction, {})
 
   useEffect(() => {
@@ -48,12 +56,28 @@ export default function LoginForm() {
           </Field>
           <Field>
             <FieldLabel htmlFor="password">Password</FieldLabel>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              aria-invalid={!!state.errors?.password}
-            />
+            <InputGroup>
+              <InputGroupInput
+                id="password"
+                name="password"
+                type={showPassword ? undefined : 'password'}
+                aria-invalid={!!state.errors?.password}
+              />
+              <InputGroupAddon align={'inline-end'}>
+                <InputGroupButton
+                  aria-label={
+                    showPassword ? 'Tutup password' : 'Lihat password'
+                  }
+                  title={showPassword ? 'Tutup password' : 'Lihat password'}
+                  size="icon-xs"
+                  onClick={() => {
+                    setShowPassword((p) => !p)
+                  }}
+                >
+                  {showPassword ? <EyeClosed /> : <Eye />}
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
             {state.errors?.password && (
               <FieldError>{state.errors?.password}</FieldError>
             )}
