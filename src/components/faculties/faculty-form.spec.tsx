@@ -111,8 +111,12 @@ describe('FacultyForm', () => {
       await clickSubmit(user)
 
       const regionEL = screen.getByRole('region', { name: /notifications/i })
-      await waitFor(() => expect(within(regionEL).getByText('Error title')).toBeVisible())
-      await waitFor(() => expect(within(regionEL).getByText('Error detail')).toBeVisible())
+      await waitFor(() =>
+        expect(within(regionEL).getByText('Error title')).toBeVisible(),
+      )
+      await waitFor(() =>
+        expect(within(regionEL).getByText('Error detail')).toBeVisible(),
+      )
     })
 
     it('should shows success toast when createFacultyAction is success', async () => {
@@ -128,11 +132,13 @@ describe('FacultyForm', () => {
       await inputName(user, 'fakultas')
       await clickSubmit(user)
 
-      await waitFor(() => expect(
-        within(
-          screen.getByRole('region', { name: /notifications/i }),
-        ).getByText('Fakultas baru berhasil dibuat'),
-      ).toBeVisible())
+      await waitFor(() =>
+        expect(
+          within(
+            screen.getByRole('region', { name: /notifications/i }),
+          ).getByText('Fakultas baru berhasil dibuat'),
+        ).toBeVisible(),
+      )
     })
   })
 
