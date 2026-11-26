@@ -22,7 +22,7 @@ export async function POST(_req: Request) {
 
   logger.debug('start get current user session')
   const session = await getSessionData()
-  logger.debug('user session obtained')
+  logger.debug('user session obtained', { session })
 
   if (!session.refreshToken) {
     logger.debug('refresh token not found. clear session')
@@ -51,12 +51,12 @@ export async function POST(_req: Request) {
   logger.debug('refresh finished')
   const jsonResponse = response.data
   if (response.status === 200) {
-    logger.debug('refresh success. start save new session')
+    logger.debug('refresh success. start save new session', { jsonResponse })
     await setSession(jsonResponse.data)
     logger.debug('new session saved. return the response')
     return NextResponse.json(jsonResponse, { status: response.status })
   } else {
-    logger.debug('refresh token failed. clear session')
+    logger.debug('refresh token failed. clear session', { jsonResponse })
     await clearSessionData()
     logger.debug('session cleared. return 401')
     return NextResponse.json(jsonResponse, { status: 401 })

@@ -13,28 +13,30 @@ export async function loginAction(
 ): Promise<ActionState<LoginRequest, null>> {
   const logger = getLogger('login-action')
 
-  logger.debug('parse form data')
+  logger.debug('parse form data', { formData })
   const parseResult = LoginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
   })
   if (!parseResult.success) {
-    logger.debug('there are invalid value on form data')
+    logger.debug('there are invalid value on form data', {
+      issues: parseResult.error.issues,
+    })
     return parseZodError(parseResult.error)
   }
-  logger.debug('form data parsed')
+  logger.debug('form data parsed', { data: parseResult.data })
   const data = parseResult.data
 
   logger.debug('start logging in user')
   const result = await httpClient.post<UserToken>('/auth/login', { json: data })
 
   if (result.error) {
-    logger.debug('failed to log in')
+    logger.debug('failed to log in', { error: result.error })
     return {
       error: { status: result.status, ...result.error },
     }
   }
-  logger.debug('login succes')
+  logger.debug('login succes', { data: result.data })
   const userToken = result.data!
 
   logger.debug('start saving session')

@@ -16,7 +16,7 @@ export default async function proxy(req: NextRequest) {
   logger.debug(`desination: ${path} `)
   logger.debug('start get current session')
   const session = await getSessionData()
-  logger.debug('current session obtained')
+  logger.debug('current session obtained', { session })
   const authenticated = typeof session.accessToken !== 'undefined'
   logger.debug(`current user is authenticated: ${authenticated}`)
 

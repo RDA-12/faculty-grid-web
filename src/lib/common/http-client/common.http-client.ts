@@ -72,7 +72,7 @@ export function createHttpClient(axios: Axios) {
   ): Promise<HTTPResponse<T>> {
     const logger = getLogger('httpClient.post')
 
-    logger.debug('start making request')
+    logger.debug('start making request', { endpoint, options })
     const response = await axios.post<ServerHTTPResponse<T>>(
       endpoint,
       options.json,
@@ -83,13 +83,13 @@ export function createHttpClient(axios: Axios) {
     )
     const jsonResponse = response.data
     if (response.status >= 200 && response.status < 300) {
-      logger.debug('request success. return data')
+      logger.debug('request success. return data', jsonResponse)
       return {
         status: response.status,
         data: (jsonResponse as ServerSuccessHTTPResponse<T>).data,
       }
     }
-    logger.debug('request failed. return error')
+    logger.debug('request failed. return error', jsonResponse)
     return {
       status: response.status,
       error: jsonResponse as ServerErrorHTTPResponse,
@@ -124,24 +124,24 @@ export function createHttpClient(axios: Axios) {
   ): Promise<HTTPResponse<T> | PaginatedHTTPResponse<T>> {
     const logger = getLogger('httpClient.get')
     if (params) {
-      logger.debug('apply query params')
+      logger.debug('apply query params', { params })
       endpoint = `${endpoint}?${new URLSearchParams(Object.entries(params).map(([k, v]) => [k, String(v)]))}`
     }
 
-    logger.debug('start making request')
+    logger.debug('start making request', { endpoint, options, params })
     const response = await axios.get<ServerHTTPResponse<T>>(endpoint, {
       headers: options.headers,
       validateStatus: () => true,
     })
     const jsonResponse = response.data
     if (response.status >= 200 && response.status < 300) {
-      logger.debug('request success. return data')
+      logger.debug('request success. return data', jsonResponse)
       if (params) {
         return jsonResponse as ServerSuccessPaginatedHTTPResponse<T>
       }
       return jsonResponse as ServerSuccessHTTPResponse<T>
     }
-    logger.debug('request failed. return error')
+    logger.debug('request failed. return error', jsonResponse)
     return {
       status: response.status,
       error: jsonResponse as ServerErrorHTTPResponse,
@@ -154,19 +154,19 @@ export function createHttpClient(axios: Axios) {
   ): Promise<HTTPResponse<T>> {
     const logger = getLogger('httpClient.delete')
 
-    logger.debug('start making request')
+    logger.debug('start making request', { endpoint, options })
     const response = await axios.delete<ServerHTTPResponse<null>>(endpoint, {
       headers: options.headers,
       validateStatus: () => true,
     })
     const jsonResponse = response.data
     if (response.status >= 200 && response.status < 300) {
-      logger.debug('request success. return data')
+      logger.debug('request success. return data', jsonResponse)
       return {
         status: 204,
       }
     }
-    logger.debug('request failed. return error')
+    logger.debug('request failed. return error', jsonResponse)
     return {
       status: response.status,
       error: jsonResponse as ServerErrorHTTPResponse,

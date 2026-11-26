@@ -18,7 +18,10 @@ async function handler(
 
   logger.debug('start getting user session')
   const session = await getSessionData()
-  logger.debug('user session obtained. convert request headers to plain record')
+  logger.debug(
+    'user session obtained. convert request headers to plain record',
+    { session },
+  )
   // Convert Headers object to a plain key-value record
   const headers: Record<string, string> = {}
   req.headers.forEach((value, key) => {
@@ -28,7 +31,7 @@ async function handler(
   headers['Authorization'] = `Bearer ${session.accessToken}`
 
   // Read the body if the method supports one (GET/HEAD cannot have a body)
-  logger.debug('auth header attached')
+  logger.debug('auth header attached', { headers })
   let data: any = undefined
   if (req.body && req.method !== 'GET' && req.method !== 'HEAD') {
     logger.debug('request has body. clone it and get the array buffer')
@@ -47,7 +50,7 @@ async function handler(
     signal: req.signal,
     validateStatus: () => true,
   }
-  logger.debug('axios config constructed')
+  logger.debug('axios config constructed', { config })
 
   logger.debug('start making request')
   const response = await axiosInstance.request(config)
@@ -57,7 +60,9 @@ async function handler(
     return new NextResponse(null, { status: response.status })
   }
 
-  logger.debug('request finished. forward the response data')
+  logger.debug('request finished. forward the response data', {
+    data: response.data,
+  })
   return NextResponse.json(response.data, { status: response.status })
 }
 

@@ -32,10 +32,12 @@ axiosClient.interceptors.response.use(async (response) => {
   logger.debug('start get new token')
   const refreshResponse = await refreshAxios.post('/api/auth/refresh')
   if (refreshResponse.status != 200) {
-    logger.debug('refresh token failed. return original response')
+    logger.debug('refresh token failed. return original response', {
+      refreshResponse,
+    })
     return response
   }
-  logger.debug('refresh token success. retry the request')
+  logger.debug('refresh token success. retry the request', { refreshResponse })
   return axiosClient(originalConfig)
 })
 

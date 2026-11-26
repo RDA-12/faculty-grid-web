@@ -7,6 +7,12 @@ const root = new Logger({
     template: '[{{dateIsoStr}}] [{{logLevelName}}] [{{name}}] ',
     timeZone: 'local',
   },
+  mask: {
+    keys: ['password', 'authorization'],
+    paths: ['*.accessToken', '*.refreshToken'],
+    caseInsensitive: true,
+    placeholder: '[REDACTED]',
+  },
 })
 
 export function getLogger(

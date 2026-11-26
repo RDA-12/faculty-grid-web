@@ -10,15 +10,15 @@ export async function createFacultyAction(
 ): Promise<ActionState<CreateFacultyRequest, Faculty>> {
   const logger = getLogger('createFacultyAction')
 
-  logger.debug('start parsing data')
+  logger.debug('start parsing data', { args })
   const parsedResult = CreateFacultySchema.safeParse({
     name: args.name,
   })
   if (!parsedResult.success) {
-    logger.debug('parse failed')
+    logger.debug('parse failed', { issues: parsedResult.error.issues })
     return parseZodError(parsedResult.error)
   }
-  logger.debug('request parsed')
+  logger.debug('request parsed', { data: parsedResult.data })
   const data = parsedResult.data
 
   logger.debug('start creating new faculty')
@@ -27,12 +27,12 @@ export async function createFacultyAction(
   })
 
   if (response.error) {
-    logger.debug('create faculty failed')
+    logger.debug('create faculty failed', { error: response.error })
     return {
       error: { status: response.status, ...response.error },
     }
   }
-  logger.debug('faculty created')
+  logger.debug('faculty created', { data: response.data })
   return {
     data: response.data,
   }
@@ -43,11 +43,11 @@ export async function deleteFacultyAction(
 ): Promise<ActionState<string, boolean>> {
   const logger = getLogger('deleteFacultyAction')
 
-  logger.debug('start deleting a faculty')
+  logger.debug('start deleting a faculty', { id })
   const response = await httpClient.delete(`/faculties/${id}`, {})
 
   if (response?.error) {
-    logger.debug('delete faculty failed')
+    logger.debug('delete faculty failed', { error: response.error })
     return {
       error: {
         status: response.status,
@@ -55,7 +55,7 @@ export async function deleteFacultyAction(
       },
     }
   }
-  logger.debug('delete faculty success')
+  logger.debug('delete faculty success', { data: response.data })
   return {
     data: true,
   }

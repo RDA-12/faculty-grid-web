@@ -21,7 +21,7 @@ export async function getFacultiesQuery(
     },
   )
   if (response.error) {
-    logger.debug('get faculties failed')
+    logger.debug('get faculties failed', { error: response.error })
     return {
       error: {
         status: response.status,
@@ -29,7 +29,7 @@ export async function getFacultiesQuery(
       },
     }
   }
-  logger.debug('get faculties success')
+  logger.debug('get faculties success', { data: response.data })
   return {
     data: { data: response.data ?? [], pagination: response.pagination! },
   }
