@@ -52,8 +52,13 @@ async function handler(
   logger.debug('start making request')
   const response = await axiosInstance.request(config)
 
+  if (response.status === 204) {
+    logger.debug('request finished. its delete, forward the undefined data')
+    return new NextResponse(null, { status: response.status })
+  }
+
   logger.debug('request finished. forward the response data')
   return NextResponse.json(response.data, { status: response.status })
 }
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST, handler as DELETE, handler as PUT }
