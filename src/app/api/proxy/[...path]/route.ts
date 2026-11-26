@@ -1,20 +1,21 @@
 import { getLogger } from '@/lib/common/logger'
 import { getSessionData } from '@/lib/common/user-session'
 import axios, { type AxiosRequestConfig } from 'axios'
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 const backendApiUrl = process.env.BACKEND_API_URL ?? 'http://localhost:8000'
 
 const axiosInstance = axios.create({ baseURL: backendApiUrl })
 
 async function handler(
-  req: Request,
+  req: NextRequest,
   ctx: RouteContext<'/api/proxy/[...path]'>,
 ) {
   const method = req.method
   const logger = getLogger(`ProxyRouteHandler.${method}`)
 
   const endpoint = (await ctx.params).path.join('/')
+  const searchParams = req.nextUrl.searchParams
 
   logger.debug('start getting user session')
   const session = await getSessionData()
@@ -43,7 +44,7 @@ async function handler(
   // Build the AxiosRequestConfig
   logger.debug('construct axios config')
   const config: AxiosRequestConfig = {
-    url: '/' + endpoint,
+    url: '/' + endpoint + `?${searchParams}`,
     method: req.method,
     headers,
     data,
