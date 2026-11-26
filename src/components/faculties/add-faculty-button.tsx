@@ -25,7 +25,9 @@ export default function AddFacultyButton({
       }}
     >
       <DialogTrigger asChild>
-        <Button className="w-min">{label}</Button>
+        <Button className="w-min" data-testid="AddFacultyButton">
+          {label}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

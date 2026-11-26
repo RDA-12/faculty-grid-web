@@ -40,7 +40,7 @@ export default async function FacultiesListPage(
       ]}
     >
       <main className="flex flex-col gap-4">
-        <FacultiesSearchBar />
+        <FacultiesSearchBar initialParams={params} />
         <FacultiesList
           initial={result.error?.status === 401 ? undefined : result}
           params={params}
