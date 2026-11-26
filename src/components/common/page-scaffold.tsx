@@ -7,10 +7,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '../ui/breadcrumb'
+import Link from 'next/link'
+import type { Route } from 'next'
 
 type LinkData = {
   label: string
-  href: string
+  href: Route
 }
 
 type PageScaffoldProps = {
@@ -41,7 +43,9 @@ export default function PageScaffold({
     return (
       <Fragment key={index}>
         <BreadcrumbItem>
-          <BreadcrumbLink href={link.href}>{link.label}</BreadcrumbLink>
+          <BreadcrumbLink asChild>
+            <Link href={link.href}>{link.label}</Link>
+          </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
       </Fragment>
