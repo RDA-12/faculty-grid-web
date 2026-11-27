@@ -3,6 +3,7 @@ import { createProgramAction, deleteProgramAction } from './programs.action'
 import { getProgramResponse } from '../../../test/mock/http-response/program.response'
 import httpClient from '../common/http-client/http-client.browser'
 import type { CreateProgramRequest } from './programs.schema'
+import { ProgramDegreeLevel } from './program.types'
 
 vi.mock('../common/http-client/http-client.browser', () => ({
   default: {
@@ -22,12 +23,14 @@ describe('ProgramsAction', () => {
     const createRequest: CreateProgramRequest = {
       name: 'program name',
       facultyId: 'faculty-id-123',
+      degreeLevel: ProgramDegreeLevel.bachelor,
     }
 
     it('should return errors when name validation failed', async () => {
       const result = await createProgramAction({
         name: '',
         facultyId: 'faculty-id-123',
+        degreeLevel: ProgramDegreeLevel.bachelor,
       })
 
       expect(result).toMatchObject({
@@ -41,11 +44,26 @@ describe('ProgramsAction', () => {
       const result = await createProgramAction({
         name: 'program name',
         facultyId: '',
+        degreeLevel: ProgramDegreeLevel.bachelor,
       })
 
       expect(result).toMatchObject({
         errors: {
           facultyId: 'Wajib diisi',
+        },
+      })
+    })
+
+    it('should return errors when degreeLevel validation failed', async () => {
+      const result = await createProgramAction({
+        name: 'program name',
+        facultyId: 'faculty-id-123',
+        degreeLevel: '' as unknown as ProgramDegreeLevel,
+      })
+
+      expect(result).toMatchObject({
+        errors: {
+          degreeLevel: 'Wajib diisi',
         },
       })
     })
@@ -78,6 +96,7 @@ describe('ProgramsAction', () => {
         json: {
           name: createRequest.name,
           facultyId: createRequest.facultyId,
+          degreeLevel: createRequest.degreeLevel,
         },
       })
     })

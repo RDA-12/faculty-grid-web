@@ -5,7 +5,10 @@ import {
   internalError,
   safeGetResponse,
 } from './common.response'
-import type { Program } from '../../../src/lib/programs/program.types'
+import {
+  ProgramDegreeLevel,
+  type Program,
+} from '../../../src/lib/programs/program.types'
 
 type ProgramEndpoint = '/programs' | '/programs/id'
 
@@ -17,6 +20,7 @@ const programResponse: HTTPEndpointResponseMock<ProgramEndpoint, Program> = {
         data: {
           id: '01a2029d-5106-7e9e-9f28-f108b95c930c',
           name: 'Sistem Informasi',
+          degreeLevel: ProgramDegreeLevel.bachelor,
           facultyId: '01a1f881-5310-76ea-b7b7-56bc21c71aeb',
         },
       },
@@ -36,6 +40,7 @@ const programResponse: HTTPEndpointResponseMock<ProgramEndpoint, Program> = {
           {
             id: '01a1f881-5310-76ea-b7b7-56bc21c71aeb',
             name: 'Sistem Informasi',
+            degreeLevel: ProgramDegreeLevel.bachelor,
             facultyId: '01a2029d-5106-7e9e-9f28-f108b95c930c',
           },
         ],

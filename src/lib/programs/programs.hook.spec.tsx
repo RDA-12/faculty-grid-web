@@ -5,7 +5,7 @@ import {
   usePrograms,
 } from './programs.hook'
 import type { PaginatedData } from '../common/pagination'
-import type { Program } from './program.types'
+import { ProgramDegreeLevel, type Program } from './program.types'
 import { getProgramsQuery, type GetProgramsQueryResult } from './programs.query'
 import { act, waitFor } from '@testing-library/react'
 import { internalError } from '../../../test/mock/http-response/common.response'
@@ -17,7 +17,14 @@ import type { ActionState } from '../common/types'
 vi.mock('./programs.query', () => ({
   getProgramsQuery: vi.fn().mockResolvedValue({
     data: {
-      data: [{ id: 'id', name: 'name', facultyId: 'faculty-id' }],
+      data: [
+        {
+          id: 'id',
+          name: 'name',
+          degreeLevel: 'bachelor',
+          facultyId: 'faculty-id',
+        },
+      ],
       pagination: {
         total: 1,
         page: 1,
@@ -28,7 +35,12 @@ vi.mock('./programs.query', () => ({
 }))
 vi.mock('./programs.action', () => ({
   createProgramAction: vi.fn().mockResolvedValue({
-    data: { id: 'id', name: 'name', facultyId: 'faculty-id' },
+    data: {
+      id: 'id',
+      name: 'name',
+      degreeLevel: 'bachelor',
+      facultyId: 'faculty-id',
+    },
   }),
   deleteProgramAction: vi.fn().mockResolvedValue({
     data: true,
@@ -37,7 +49,14 @@ vi.mock('./programs.action', () => ({
 
 describe('ProgramsHook', () => {
   const programs: PaginatedData<Program> = {
-    data: [{ id: 'id', name: 'name', facultyId: 'faculty-id' }],
+    data: [
+      {
+        id: 'id',
+        name: 'name',
+        degreeLevel: ProgramDegreeLevel.bachelor,
+        facultyId: 'faculty-id',
+      },
+    ],
     pagination: {
       total: 1,
       page: 1,
@@ -153,12 +172,14 @@ describe('ProgramsHook', () => {
 
       result.current.createProgram({
         name: 'new program',
+        degreeLevel: ProgramDegreeLevel.bachelor,
         facultyId: 'fac-1',
       })
 
       await waitFor(() =>
         expect(createProgramAction).toHaveBeenCalledExactlyOnceWith({
           name: 'new program',
+          degreeLevel: ProgramDegreeLevel.bachelor,
           facultyId: 'fac-1',
         }),
       )
@@ -169,12 +190,14 @@ describe('ProgramsHook', () => {
         data: {
           id: 'id',
           name: 'new program',
+          degreeLevel: ProgramDegreeLevel.bachelor,
           facultyId: 'fac-1',
         },
       }
       vi.mocked(createProgramAction).mockResolvedValueOnce(expectedData)
       const expectedArgs: CreateProgramRequest = {
         name: 'new program',
+        degreeLevel: ProgramDegreeLevel.bachelor,
         facultyId: 'fac-1',
       }
       let receivedArgs: CreateProgramRequest
@@ -202,6 +225,7 @@ describe('ProgramsHook', () => {
       vi.mocked(createProgramAction).mockResolvedValueOnce(expectedData)
       const expectedArgs: CreateProgramRequest = {
         name: 'new program',
+        degreeLevel: ProgramDegreeLevel.bachelor,
         facultyId: 'fac-1',
       }
       let receivedData: ActionState<CreateProgramRequest, Program>
@@ -224,6 +248,7 @@ describe('ProgramsHook', () => {
       result.current.deleteProgram({
         id: 'id',
         name: 'name',
+        degreeLevel: ProgramDegreeLevel.bachelor,
         facultyId: 'fac-1',
       })
 
@@ -240,6 +265,7 @@ describe('ProgramsHook', () => {
       const expectedArgs: Program = {
         id: 'id',
         name: 'name',
+        degreeLevel: ProgramDegreeLevel.bachelor,
         facultyId: 'fac-1',
       }
       let receivedArgs: Program
@@ -268,6 +294,7 @@ describe('ProgramsHook', () => {
       const expectedArgs: Program = {
         id: 'id',
         name: 'name',
+        degreeLevel: ProgramDegreeLevel.bachelor,
         facultyId: 'fac-1',
       }
       let receivedData: ActionState<string, boolean>

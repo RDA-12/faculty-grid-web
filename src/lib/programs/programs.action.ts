@@ -14,6 +14,7 @@ export async function createProgramAction(
   const parsedResult = CreateProgramSchema.safeParse({
     name: args.name,
     facultyId: args.facultyId,
+    degreeLevel: args.degreeLevel,
   })
   if (!parsedResult.success) {
     logger.debug('parse failed', { issues: parsedResult.error.issues })
