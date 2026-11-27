@@ -49,9 +49,14 @@ describe('FacultyActions', () => {
 
       await openDropdown(user)
 
-      expect(
-        screen.getByRole('menuitem', { name: /lihat detail/i }),
-      ).toBeVisible()
+      const detailItem = screen.getByRole('menuitem', {
+        name: new RegExp(`lihat detail ${faculty.name}`, 'i'),
+      })
+      expect(detailItem).toBeVisible()
+      expect(detailItem).toHaveAttribute(
+        'href',
+        `/dashboard/faculties/${faculty.id}`,
+      )
     })
 
     it('should shows update item when opened', async () => {

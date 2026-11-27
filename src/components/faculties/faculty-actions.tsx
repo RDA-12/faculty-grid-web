@@ -13,6 +13,7 @@ import {
 } from '../ui/dropdown-menu'
 import type { Faculty } from '@/lib/faculties/faculty.types'
 import { useDeleteFaculty } from '@/lib/faculties/faculties.hook'
+import Link from 'next/link'
 
 type FacultyActionsProps = {
   faculty: Faculty
@@ -51,9 +52,14 @@ export default function FacultyActions({
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
             <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-            <DropdownMenuItem>
-              <Eye />
-              Lihat detail
+            <DropdownMenuItem asChild>
+              <Link
+                href={`/dashboard/faculties/${faculty.id}`}
+                aria-label={`Lihat detail ${faculty.name}`}
+              >
+                <Eye />
+                <span>Lihat detail</span>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Pencil />
