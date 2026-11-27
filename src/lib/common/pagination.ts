@@ -7,7 +7,7 @@ export type Pagination = {
 
 export type PaginationResult = {
   total: number
-} & Pagination
+} & Required<Pagination>
 
 export type PaginatedData<T> = {
   data: T[]

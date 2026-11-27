@@ -8,12 +8,21 @@ import {
   type GetFacultiesQueryResult,
 } from '@/lib/faculties/faculties.query'
 import { internalError } from '../../../test/mock/http-response/common.response'
-import { useRouter } from 'next/navigation'
+import {
+  ReadonlyURLSearchParams,
+  useRouter,
+  useSearchParams,
+} from 'next/navigation'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
-vi.mock('next/navigation', () => ({
-  useRouter: vi.fn(),
-}))
+vi.mock('next/navigation', async (importOrginal) => {
+  const original: object = await importOrginal()
+  return {
+    ...original,
+    useRouter: vi.fn(),
+    useSearchParams: vi.fn(),
+  }
+})
 vi.mock('@/lib/faculties/faculties.query', () => ({
   getFacultiesQuery: vi.fn().mockResolvedValue({
     data: {
@@ -44,13 +53,18 @@ describe('FacultiesList', () => {
     data: initialData,
   }
   let replaceMock = vi.fn().mockReturnValue({})
+  let pushMock = vi.fn().mockReturnValue({})
   let useRouterMock: unknown = {
     replace: replaceMock,
+    push: pushMock,
   }
 
   beforeEach(() => {
     vi.mocked(useRouter).mockImplementation(
       () => useRouterMock as AppRouterInstance,
+    )
+    vi.mocked(useSearchParams).mockImplementation(
+      () => new ReadonlyURLSearchParams({ page: '1', pageSize: '10' }),
     )
   })
 
@@ -119,12 +133,87 @@ describe('FacultiesList', () => {
       await waitFor(() => expect(screen.getByRole('status')).toBeVisible())
 
       await act(async () => {
-        resolveAction({})
+        resolveAction({
+          data: {
+            data: [],
+            pagination: {
+              page: 1,
+              pageSize: 10,
+              total: 0,
+            },
+          },
+        })
       })
 
       await waitFor(() =>
         expect(screen.queryByRole('status')).not.toBeInTheDocument(),
       )
+    })
+
+    it('should shows pagination', () => {
+      render(
+        <FacultiesList
+          initial={{
+            data: {
+              ...initialData,
+              pagination: { page: 2, pageSize: 5, total: 100 },
+            },
+          }}
+        />,
+      )
+
+      expect(
+        screen.getByRole('combobox', { name: /data per halaman/i }),
+      ).toBeVisible()
+      expect(
+        screen.getByRole('navigation', { name: /pagination/i }),
+      ).toBeVisible()
+      expect(screen.getByRole('link', { name: /selanjutnya/i })).toBeVisible()
+      expect(screen.getByRole('link', { name: /sebelumnya/i })).toBeVisible()
+    })
+
+    it('should shows disabled prev when there is no prev page', () => {
+      render(
+        <FacultiesList
+          initial={{
+            data: {
+              ...initialData,
+              pagination: { page: 1, pageSize: 5, total: 100 },
+            },
+          }}
+        />,
+      )
+
+      expect(
+        screen.getByRole('combobox', { name: /data per halaman/i }),
+      ).toBeVisible()
+      expect(
+        screen.getByRole('navigation', { name: /pagination/i }),
+      ).toBeVisible()
+      expect(screen.getByRole('button', { name: /sebelumnya/i })).toBeDisabled()
+    })
+
+    it('should shows disabled next when there is no next page', () => {
+      render(
+        <FacultiesList
+          initial={{
+            data: {
+              ...initialData,
+              pagination: { page: 2, pageSize: 5, total: 10 },
+            },
+          }}
+        />,
+      )
+
+      expect(
+        screen.getByRole('combobox', { name: /data per halaman/i }),
+      ).toBeVisible()
+      expect(
+        screen.getByRole('navigation', { name: /pagination/i }),
+      ).toBeVisible()
+      expect(
+        screen.getByRole('button', { name: /selanjutnya/i }),
+      ).toBeDisabled()
     })
   })
 
@@ -147,6 +236,45 @@ describe('FacultiesList', () => {
       await user.click(buttonEl)
 
       expect(getFacultiesQuery).toHaveBeenCalledOnce()
+    })
+
+    it('allows changing page size', async () => {
+      vi.mocked(useSearchParams).mockReturnValueOnce(
+        new ReadonlyURLSearchParams({
+          page: '1',
+          pageSize: '10',
+          search: 'lol',
+        }),
+      )
+      const { user } = render(
+        <FacultiesList
+          initial={{
+            data: {
+              ...initialData,
+              pagination: {
+                page: 1,
+                pageSize: 10,
+                total: 10,
+              },
+            },
+          }}
+        />,
+      )
+
+      const pageSelectorEl = screen.getByRole('combobox', {
+        name: /data per halaman/i,
+      })
+      expect(pageSelectorEl).toBeVisible()
+      await user.click(pageSelectorEl)
+      const optionEl = screen.getByRole('option', { name: '25', hidden: true })
+      await waitFor(() => expect(optionEl).toBeVisible())
+      await user.click(optionEl)
+
+      await waitFor(() =>
+        expect(pushMock).toHaveBeenCalledExactlyOnceWith(
+          `/dashboard/faculties?page=1&pageSize=25&search=lol`,
+        ),
+      )
     })
   })
 })
