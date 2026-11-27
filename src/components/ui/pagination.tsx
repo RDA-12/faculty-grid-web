@@ -75,7 +75,7 @@ function PaginationLink({
           {children}
         </Link>
       ) : (
-        <span>{children}</span>
+        children
       )}
     </Button>
   )
