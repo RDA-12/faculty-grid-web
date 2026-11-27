@@ -44,7 +44,7 @@ export default function FacultiesSearchBar({
   }
 
   return (
-    <div className="flex flex-row gap-2">
+    <div className="flex flex-row gap-2 shrink-0">
       <InputGroup>
         <form onSubmit={handleSubmit(onSubmit)} className="flex-1">
           <InputGroupInput

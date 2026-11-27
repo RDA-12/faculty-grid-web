@@ -90,7 +90,7 @@ export default function FacultiesTable({ faculties }: FacultiesTableProps) {
   return (
     <>
       <div
-        className="w-full overflow-hidden rounded-md border"
+        className="w-full flex-1 min-h-0 overflow-auto rounded-md border"
         data-testid="FacultiesTable"
       >
         <Table>

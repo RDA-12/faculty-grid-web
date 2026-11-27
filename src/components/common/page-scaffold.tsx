@@ -53,8 +53,8 @@ export default function PageScaffold({
   })
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-8">
+      <header className="flex flex-col gap-4 shrink-0">
         <Breadcrumb>
           <BreadcrumbList>
             {...previousLinks}
@@ -71,9 +71,9 @@ export default function PageScaffold({
             <p className="text-muted-foreground">{description}</p>
           )}
         </div>
-      </div>
+      </header>
 
-      {children}
+      <div className="flex-1 flex flex-col min-h-0">{children}</div>
     </div>
   )
 }

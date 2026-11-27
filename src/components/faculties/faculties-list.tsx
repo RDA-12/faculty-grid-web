@@ -92,9 +92,9 @@ export default function FacultiesList({ initial, params }: FacultiesListProps) {
 
   if (faculties) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex-1 flex flex-col gap-4 min-h-0">
         <FacultiesTable faculties={faculties.data} />
-        <div className="flex flex-row justify-end gap-4">
+        <div className="flex flex-row justify-end gap-4 shrink-0">
           <Field orientation="horizontal" className="w-fit">
             <FieldLabel htmlFor="select-rows-per-page">
               Data per halaman
