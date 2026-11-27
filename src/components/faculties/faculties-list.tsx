@@ -143,5 +143,9 @@ export default function FacultiesList({ initial, params }: FacultiesListProps) {
     )
   }
 
-  return <Spinner className="size-16" />
+  return (
+    <div className="flex-1 flex flex-col justify-center items-center gap-4 min-h-0">
+      <Spinner className="size-16" />
+    </div>
+  )
 }
