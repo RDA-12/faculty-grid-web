@@ -7,7 +7,7 @@ import {
 } from './common.response'
 import { RankType, type Rank } from '../../../src/lib/rank/rank.types'
 
-type RankEndpoint = '/ranks'
+type RankEndpoint = '/ranks' | '/ranks/id'
 
 const rankResponse: HTTPEndpointResponseMock<RankEndpoint, Rank> = {
   '/ranks': {
@@ -44,6 +44,22 @@ const rankResponse: HTTPEndpointResponseMock<RankEndpoint, Rank> = {
           pageSize: 5,
           total: 5,
         },
+      },
+      401: {
+        status: 401,
+        error: {
+          title: 'Provided credential is invalid',
+          detail: 'Email/password/both is invalid. Please check again',
+        },
+      },
+      500: internalError,
+    },
+  },
+  '/ranks/id': {
+    DELETE: {
+      204: {
+        status: 204,
+        data: undefined,
       },
       401: {
         status: 401,

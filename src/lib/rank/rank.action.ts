@@ -38,3 +38,26 @@ export async function createRankAction(
     data: response.data,
   }
 }
+
+export async function deleteRankAction(
+  id: string,
+): Promise<ActionState<string, boolean>> {
+  const logger = getLogger('deleteRankAction')
+
+  logger.debug('start deleting a rank', { id })
+  const response = await httpClient.delete(`/ranks/${id}`, {})
+
+  if (response?.error) {
+    logger.debug('delete rank failed', { error: response.error })
+    return {
+      error: {
+        status: response.status,
+        ...response.error,
+      },
+    }
+  }
+  logger.debug('delete rank success', { data: response.data })
+  return {
+    data: true,
+  }
+}

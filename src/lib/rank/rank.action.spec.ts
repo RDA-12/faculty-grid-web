@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createRankAction } from './rank.action'
+import { createRankAction, deleteRankAction } from './rank.action'
 import { getRankResponse } from '../../../test/mock/http-response/rank.response'
 import httpClient from '../common/http-client/http-client.browser'
 import type { CreateRankRequest } from './rank.schema'
@@ -10,6 +10,9 @@ vi.mock('../common/http-client/http-client.browser', () => ({
     post: vi.fn().mockImplementation(() => {
       return getRankResponse('/ranks', 'POST', 200)
     }),
+    delete: vi
+      .fn()
+      .mockImplementation(() => getRankResponse('/ranks/id', 'DELETE', 204)),
   },
 }))
 
@@ -76,6 +79,38 @@ describe('RankAction', () => {
           type: createRequest.type,
         },
       })
+    })
+  })
+
+  describe('deleteRankAction', () => {
+    it('should return error when /ranks/id failed', async () => {
+      const response = getRankResponse('/ranks/id', 'DELETE', 500)
+      vi.mocked(httpClient.delete).mockImplementationOnce(async () => {
+        return response
+      })
+
+      const result = await deleteRankAction('id')
+
+      expect(result).toMatchObject({
+        error: response.error,
+      })
+    })
+
+    it('should return success when /ranks/id success', async () => {
+      const result = await deleteRankAction('id')
+
+      expect(result).toMatchObject({
+        data: true,
+      })
+    })
+
+    it('should call correct endpoint', async () => {
+      await deleteRankAction('rankId')
+
+      expect(httpClient.delete).toHaveBeenCalledExactlyOnceWith(
+        '/ranks/rankId',
+        {},
+      )
     })
   })
 })

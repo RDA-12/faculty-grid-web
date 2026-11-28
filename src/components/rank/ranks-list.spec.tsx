@@ -28,6 +28,9 @@ vi.mock('@/lib/rank/rank.query', () => ({
     },
   }),
 }))
+vi.mock('@/lib/rank/rank.action', () => ({
+  deleteRankAction: vi.fn(),
+}))
 
 describe('RanksList', () => {
   const initialData: PaginatedData<Rank> = {

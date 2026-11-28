@@ -7,7 +7,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import type { CreateRankRequest, RanksQueryParams } from './rank.schema'
-import { createRankAction } from './rank.action'
+import { createRankAction, deleteRankAction } from './rank.action'
 import { getRanksQuery, type GetRanksQueryResult } from './rank.query'
 import httpClient from '../common/http-client/http-client.browser'
 import type { ActionState } from '../common/types'
@@ -71,5 +71,41 @@ export function useCreateRank(
       mutation.mutate(args)
     },
     pendingCreation,
+  }
+}
+
+export function useDeleteRank(
+  onSettled?: (vars: Rank, res: ActionState<string, boolean>) => void,
+) {
+  const queryClient = useQueryClient()
+  const mutationKey = ['delete-rank']
+
+  const mutation = useMutation({
+    mutationKey,
+    mutationFn: (rank: Rank) => deleteRankAction(rank.id),
+    onSettled: async (data, error, variables) => {
+      if (data && !data.error) {
+        await queryClient.invalidateQueries({ queryKey: RANKS_KEY })
+      }
+      if (!onSettled) return
+      if (data) onSettled(variables, data)
+      if (error) {
+        onSettled(variables, {
+          error: { status: 500, title: 'Internal error', detail: `${error}` },
+        })
+      }
+    },
+  })
+
+  const pendingDeletion = useMutationState({
+    filters: { mutationKey, status: 'pending' },
+    select: (m) => m.state.variables as Rank,
+  })
+
+  return {
+    deleteRank: (rank: Rank) => {
+      mutation.mutate(rank)
+    },
+    pendingDeletion,
   }
 }

@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { useCreateRank, useRanks } from './rank.hook'
+import { useCreateRank, useDeleteRank, useRanks } from './rank.hook'
 import type { PaginatedData } from '../common/pagination'
 import { RankType, type Rank } from './rank.types'
 import { getRanksQuery, type GetRanksQueryResult } from './rank.query'
 import { internalError } from '../../../test/mock/http-response/common.response'
 import { act, renderHook, waitFor } from '../../../test/rtl-helper'
-import { createRankAction } from './rank.action'
+import { createRankAction, deleteRankAction } from './rank.action'
 import type { CreateRankRequest } from './rank.schema'
 import type { ActionState } from '../common/types'
 
@@ -34,6 +34,9 @@ vi.mock('./rank.action', () => ({
       name: 'Penata Muda (III/a)',
       type: 'asn',
     },
+  }),
+  deleteRankAction: vi.fn().mockResolvedValue({
+    data: true,
   }),
 }))
 
@@ -260,6 +263,107 @@ describe('RankHook', () => {
 
       await waitFor(() =>
         expect(result.current.pendingCreation).toStrictEqual([]),
+      )
+    })
+  })
+
+  describe('useDeleteRank', () => {
+    it('should call deleteRankAction once', async () => {
+      const { result } = renderHook(() => useDeleteRank())
+
+      result.current.deleteRank({
+        id: 'id',
+        name: 'Penata Muda (III/a)',
+        type: RankType.asn,
+      })
+
+      await waitFor(() =>
+        expect(deleteRankAction).toHaveBeenCalledExactlyOnceWith('id'),
+      )
+    })
+
+    it('should call onSettled when success', async () => {
+      const expectedData: ActionState<string, boolean> = {
+        data: true,
+      }
+      vi.mocked(deleteRankAction).mockResolvedValueOnce(expectedData)
+      const expectedArgs: Rank = {
+        id: 'id',
+        name: 'Penata Muda (III/a)',
+        type: RankType.asn,
+      }
+      let receivedArgs: Rank
+      let receivedData: ActionState<string, boolean>
+      const { result } = renderHook(() =>
+        useDeleteRank((args, data) => {
+          receivedArgs = args
+          receivedData = data
+        }),
+      )
+
+      result.current.deleteRank(expectedArgs)
+
+      await waitFor(() => expect(receivedArgs).toStrictEqual(expectedArgs))
+      await waitFor(() => expect(receivedData).toStrictEqual(expectedData))
+    })
+
+    it('should call onSettled when failed', async () => {
+      const expectedData: ActionState<string, boolean> = {
+        error: {
+          status: 500,
+          ...internalError.error,
+        },
+      }
+      vi.mocked(deleteRankAction).mockResolvedValueOnce(expectedData)
+      const expectedArgs: Rank = {
+        id: 'id',
+        name: 'Penata Muda (III/a)',
+        type: RankType.asn,
+      }
+      let receivedData: ActionState<string, boolean>
+      const { result } = renderHook(() =>
+        useDeleteRank((_args, data) => {
+          receivedData = data
+        }),
+      )
+
+      result.current.deleteRank(expectedArgs)
+
+      await waitFor(() => expect(receivedData).toStrictEqual(expectedData))
+    })
+
+    it('should track pendingDeletion while mutation is pending', async () => {
+      let resolve!: (v: ActionState<string, boolean>) => void
+      vi.mocked(deleteRankAction).mockImplementationOnce(
+        () =>
+          new Promise((r) => {
+            resolve = r
+          }),
+      )
+
+      const rank: Rank = {
+        id: 'id',
+        name: 'Penata Muda (III/a)',
+        type: RankType.asn,
+      }
+      const { result } = renderHook(() => useDeleteRank())
+
+      expect(result.current.pendingDeletion).toStrictEqual([])
+
+      act(() => {
+        result.current.deleteRank(rank)
+      })
+
+      await waitFor(() =>
+        expect(result.current.pendingDeletion).toStrictEqual([rank]),
+      )
+
+      await act(async () => {
+        resolve({ data: true })
+      })
+
+      await waitFor(() =>
+        expect(result.current.pendingDeletion).toStrictEqual([]),
       )
     })
   })
