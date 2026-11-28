@@ -1,9 +1,38 @@
+export const instant = false
+
 import PageScaffold from '@/components/common/page-scaffold'
 import AddProgramButton from '@/components/programs/add-program-button'
+import ProgramsList from '@/components/programs/programs-list'
+import httpClient from '@/lib/common/http-client/http-client.server'
+import { ProgramDegreeLevel } from '@/lib/programs/program.types'
+import { getProgramsQuery } from '@/lib/programs/programs.query'
+import { connection } from 'next/server'
 
 export default async function ProgramsPage(
-  _props: PageProps<'/dashboard/programs'>,
+  props: PageProps<'/dashboard/programs'>,
 ) {
+  await connection()
+  const searchParams = (await props.searchParams) as Record<
+    string,
+    string | undefined
+  >
+  const degreeLevelParam = searchParams['degreeLevel']
+  const degreeLevel = Object.values(ProgramDegreeLevel).includes(
+    degreeLevelParam as ProgramDegreeLevel,
+  )
+    ? (degreeLevelParam as ProgramDegreeLevel)
+    : undefined
+  const params = {
+    search: searchParams['search'] ?? undefined,
+    facultyId: searchParams['facultyId'] ?? undefined,
+    degreeLevel,
+    page: searchParams['page'] ? Number(searchParams['page']) : undefined,
+    pageSize: searchParams['pageSize']
+      ? Number(searchParams['pageSize'])
+      : undefined,
+  }
+  const result = await getProgramsQuery(httpClient, params)
+
   return (
     <PageScaffold
       title="Data Program Studi"
@@ -21,7 +50,10 @@ export default async function ProgramsPage(
     >
       <main className="flex-1 flex flex-col gap-4 min-h-0">
         <AddProgramButton />
-        <p>Data Program Studi is in development</p>
+        <ProgramsList
+          initial={result.error?.status === 401 ? undefined : result}
+          params={params}
+        />
       </main>
     </PageScaffold>
   )
