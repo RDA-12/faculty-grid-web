@@ -19,6 +19,7 @@ export function DashboardSidebar() {
         <div className="flex flex-col gap-4">
           <NavItem href="/dashboard/faculties" label="Fakultas" />
           <NavItem href="/dashboard/programs" label="Program Studi" />
+          <NavItem href="/dashboard/ranks" label="Pangkat/Golongan" />
         </div>
       </CardContent>
     </Card>
