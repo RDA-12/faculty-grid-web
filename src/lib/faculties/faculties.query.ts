@@ -13,7 +13,7 @@ export async function getFacultiesQuery(
 ): Promise<GetFacultiesQueryResult> {
   const logger = getLogger('getFacultiesQuery')
 
-  logger.debug('start get faculties')
+  logger.debug('start get faculties', { params })
   const response = await httpClient.get<Faculty>('/faculties', {}, params ?? {})
   if (response.error) {
     logger.debug('get faculties failed', { error: response.error })

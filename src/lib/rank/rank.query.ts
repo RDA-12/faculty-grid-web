@@ -13,7 +13,7 @@ export async function getRanksQuery(
 ): Promise<GetRanksQueryResult> {
   const logger = getLogger('getRanksQuery')
 
-  logger.debug('start get ranks')
+  logger.debug('start get ranks', { params })
   const response = await httpClient.get<Rank>('/ranks', {}, params ?? {})
   if (response.error) {
     logger.debug('get ranks failed', { error: response.error })

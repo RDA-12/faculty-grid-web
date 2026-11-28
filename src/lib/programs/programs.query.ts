@@ -13,7 +13,7 @@ export async function getProgramsQuery(
 ): Promise<GetProgramsQueryResult> {
   const logger = getLogger('getProgramsQuery')
 
-  logger.debug('start get programs')
+  logger.debug('start get programs', { params })
   const response = await httpClient.get<Program>('/programs', {}, params ?? {})
   if (response.error) {
     logger.debug('get programs failed', { error: response.error })
