@@ -28,7 +28,7 @@ export default function ProgramDegreeSelector({
         }
       }}
     >
-      <SelectTrigger className="w-full max-w-48">
+      <SelectTrigger className="w-full">
         <SelectValue placeholder="Pilih tingkat pendidikan" />
       </SelectTrigger>
       <SelectContent>

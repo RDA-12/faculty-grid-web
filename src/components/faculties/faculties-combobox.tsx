@@ -24,7 +24,7 @@ export default function FacultiesCombobox({
 }: FacultiesComboboxProps) {
   const [search, setSearch] = useState<string | undefined>()
   const [searchQuery] = useDebounce(search, 500)
-  const { faculties } = useFaculties({}, { search: searchQuery })
+  const { faculties } = useFaculties(undefined, { search: searchQuery })
 
   return (
     <Combobox<Faculty>

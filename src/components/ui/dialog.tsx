@@ -47,6 +47,13 @@ function DialogOverlay({
   )
 }
 
+const DialogContentContainerContext =
+  React.createContext<HTMLDivElement | null>(null)
+
+function useDialogContentContainer() {
+  return React.useContext(DialogContentContainerContext)
+}
+
 function DialogContent({
   className,
   children,
@@ -55,6 +62,8 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  const [container, setContainer] = React.useState<HTMLDivElement | null>(null)
+
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -66,7 +75,14 @@ function DialogContent({
         )}
         {...props}
       >
-        {children}
+        <DialogContentContainerContext value={container}>
+          {children}
+        </DialogContentContainerContext>
+        <div
+          ref={setContainer}
+          data-slot="dialog-portal-container"
+          className="absolute top-0 left-0 size-0"
+        />
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button
@@ -164,4 +180,5 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
+  useDialogContentContainer,
 }

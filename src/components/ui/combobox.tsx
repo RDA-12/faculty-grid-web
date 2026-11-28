@@ -12,6 +12,7 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group'
 import { ChevronDownIcon, XIcon, CheckIcon } from 'lucide-react'
+import { useDialogContentContainer } from './dialog'
 
 const Combobox = ComboboxPrimitive.Root
 
@@ -95,14 +96,20 @@ function ComboboxContent({
   align = 'start',
   alignOffset = 0,
   anchor,
+  container,
   ...props
 }: ComboboxPrimitive.Popup.Props &
   Pick<
     ComboboxPrimitive.Positioner.Props,
     'side' | 'align' | 'sideOffset' | 'alignOffset' | 'anchor'
-  >) {
+  > &
+  Pick<ComboboxPrimitive.Portal.Props, 'container'>) {
+  const dialogContainer = useDialogContentContainer()
+
   return (
-    <ComboboxPrimitive.Portal>
+    <ComboboxPrimitive.Portal
+      container={container ?? dialogContainer ?? undefined}
+    >
       <ComboboxPrimitive.Positioner
         side={side}
         sideOffset={sideOffset}

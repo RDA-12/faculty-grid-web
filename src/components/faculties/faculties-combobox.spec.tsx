@@ -72,10 +72,9 @@ describe('FacultiesCombobox', () => {
       await user.type(comboboxEl, 'search')
 
       await waitFor(() =>
-        expect(useFacultiesMock).toHaveBeenLastCalledWith(
-          {},
-          { search: 'search' },
-        ),
+        expect(useFacultiesMock).toHaveBeenLastCalledWith(undefined, {
+          search: 'search',
+        }),
       )
     })
 

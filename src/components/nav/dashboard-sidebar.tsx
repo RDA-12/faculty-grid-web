@@ -18,6 +18,7 @@ export function DashboardSidebar() {
       <CardContent>
         <div className="flex flex-col gap-4">
           <NavItem href="/dashboard/faculties" label="Fakultas" />
+          <NavItem href="/dashboard/programs" label="Program Studi" />
         </div>
       </CardContent>
     </Card>

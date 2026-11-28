@@ -1,6 +1,7 @@
 import PageScaffold from '@/components/common/page-scaffold'
+import AddProgramButton from '@/components/programs/add-program-button'
 
-export async function ProgramsPage(_props: PageProps<'/dashboard/programs'>) {
+export default async function ProgramsPage(_props: PageProps<'/dashboard/programs'>) {
   return (
     <PageScaffold
       title="Data Program Studi"
@@ -17,6 +18,7 @@ export async function ProgramsPage(_props: PageProps<'/dashboard/programs'>) {
       ]}
     >
       <main className="flex-1 flex flex-col gap-4 min-h-0">
+        <AddProgramButton />
         <p>Data Program Studi is in development</p>
       </main>
     </PageScaffold>
