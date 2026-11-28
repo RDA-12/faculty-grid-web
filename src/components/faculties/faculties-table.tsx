@@ -2,7 +2,7 @@
 
 import { createColumnHelper } from '@tanstack/react-table'
 import type { Faculty } from '@/lib/faculties/faculty.types'
-import FacultiesAction from './faculty-actions'
+import RowActions from '../common/row-actions'
 import { useDeleteFaculty } from '@/lib/faculties/faculties.hook'
 import { toast } from 'sonner'
 import { useRef } from 'react'
@@ -11,7 +11,13 @@ import { DataTable, type DefaultTableFeatures } from '../common/data-table'
 
 const columnHelper = createColumnHelper<DefaultTableFeatures, Faculty>()
 
-const createColumns = (onDeleteClicked?: (faculty: Faculty) => void) =>
+const createColumns = ({
+  isDeleting,
+  onDeleteClicked,
+}: {
+  isDeleting: (faculty: Faculty) => boolean
+  onDeleteClicked?: (faculty: Faculty) => void
+}) =>
   columnHelper.columns([
     columnHelper.display({
       id: 'number',
@@ -28,8 +34,10 @@ const createColumns = (onDeleteClicked?: (faculty: Faculty) => void) =>
     columnHelper.display({
       id: 'actions',
       cell: ({ row }) => (
-        <FacultiesAction
-          faculty={row.original}
+        <RowActions
+          label={row.original.name}
+          detailHref={`/dashboard/faculties/${row.original.id}`}
+          isDeleting={isDeleting(row.original)}
           onDeleteClicked={() => {
             if (onDeleteClicked) {
               onDeleteClicked(row.original)
@@ -47,16 +55,18 @@ type FacultiesTableProps = {
 export default function FacultiesTable({ faculties }: FacultiesTableProps) {
   // Track faculty id to its loading toast id
   const pendingDeletionRecord = useRef<Record<string, string | number>>({})
-  const { deleteFaculty } = useDeleteFaculty((faculty, data) => {
-    const loadingToastId = pendingDeletionRecord.current[faculty.id]
-    toast.dismiss(loadingToastId)
-    if (data.data) {
-      toast.success(`${faculty.name} berhasil dihapus`)
-    }
-    if (data.error) {
-      toast.error(data.error.title, { description: data.error.detail })
-    }
-  })
+  const { deleteFaculty, pendingDeletion } = useDeleteFaculty(
+    (faculty, data) => {
+      const loadingToastId = pendingDeletionRecord.current[faculty.id]
+      toast.dismiss(loadingToastId)
+      if (data.data) {
+        toast.success(`${faculty.name} berhasil dihapus`)
+      }
+      if (data.error) {
+        toast.error(data.error.title, { description: data.error.detail })
+      }
+    },
+  )
 
   const facultyDeleteDialogController = useDeleteDialog<Faculty>({
     onDeleted(f) {
@@ -66,8 +76,11 @@ export default function FacultiesTable({ faculties }: FacultiesTableProps) {
     },
   })
 
-  const columns = createColumns((f) => {
-    facultyDeleteDialogController.open(f)
+  const columns = createColumns({
+    isDeleting: (f) => pendingDeletion.includes(f),
+    onDeleteClicked: (f) => {
+      facultyDeleteDialogController.open(f)
+    },
   })
 
   return (

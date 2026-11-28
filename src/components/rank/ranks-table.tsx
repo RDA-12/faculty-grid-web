@@ -2,7 +2,7 @@
 
 import { createColumnHelper } from '@tanstack/react-table'
 import { RankType, type Rank } from '@/lib/rank/rank.types'
-import RankActions from './rank-actions'
+import RowActions from '../common/row-actions'
 import { useDeleteRank } from '@/lib/rank/rank.hook'
 import { toast } from 'sonner'
 import { useRef } from 'react'
@@ -16,7 +16,13 @@ const RANK_TYPE_LABELS: Record<RankType, string> = {
 
 const columnHelper = createColumnHelper<DefaultTableFeatures, Rank>()
 
-const createColumns = (onDeleteClicked?: (rank: Rank) => void) =>
+const createColumns = ({
+  isDeleting,
+  onDeleteClicked,
+}: {
+  isDeleting: (rank: Rank) => boolean
+  onDeleteClicked?: (rank: Rank) => void
+}) =>
   columnHelper.columns([
     columnHelper.display({
       id: 'number',
@@ -38,8 +44,10 @@ const createColumns = (onDeleteClicked?: (rank: Rank) => void) =>
     columnHelper.display({
       id: 'actions',
       cell: ({ row }) => (
-        <RankActions
-          rank={row.original}
+        <RowActions
+          label={row.original.name}
+          detailHref={`/dashboard/ranks/${row.original.id}`}
+          isDeleting={isDeleting(row.original)}
           onDeleteClicked={() => {
             if (onDeleteClicked) {
               onDeleteClicked(row.original)
@@ -57,7 +65,7 @@ type RanksTableProps = {
 export default function RanksTable({ ranks }: RanksTableProps) {
   // Track rank id to its loading toast id
   const pendingDeletionRecord = useRef<Record<string, string | number>>({})
-  const { deleteRank } = useDeleteRank((rank, data) => {
+  const { deleteRank, pendingDeletion } = useDeleteRank((rank, data) => {
     const loadingToastId = pendingDeletionRecord.current[rank.id]
     toast.dismiss(loadingToastId)
     if (data.data) {
@@ -76,8 +84,11 @@ export default function RanksTable({ ranks }: RanksTableProps) {
     },
   })
 
-  const columns = createColumns((r) => {
-    rankDeleteDialogController.open(r)
+  const columns = createColumns({
+    isDeleting: (r) => pendingDeletion.includes(r),
+    onDeleteClicked: (r) => {
+      rankDeleteDialogController.open(r)
+    },
   })
 
   return (

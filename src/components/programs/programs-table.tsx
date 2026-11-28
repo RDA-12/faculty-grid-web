@@ -2,7 +2,7 @@
 
 import { createColumnHelper } from '@tanstack/react-table'
 import { ProgramDegreeLevel, type Program } from '@/lib/programs/program.types'
-import ProgramActions from './program-actions'
+import RowActions from '../common/row-actions'
 import { useDeleteProgram } from '@/lib/programs/programs.hook'
 import { toast } from 'sonner'
 import { useRef } from 'react'
@@ -17,7 +17,13 @@ const DEGREE_LEVEL_LABELS: Record<ProgramDegreeLevel, string> = {
 
 const columnHelper = createColumnHelper<DefaultTableFeatures, Program>()
 
-const createColumns = (onDeleteClicked?: (program: Program) => void) =>
+const createColumns = ({
+  isDeleting,
+  onDeleteClicked,
+}: {
+  isDeleting: (program: Program) => boolean
+  onDeleteClicked?: (program: Program) => void
+}) =>
   columnHelper.columns([
     columnHelper.display({
       id: 'number',
@@ -39,8 +45,10 @@ const createColumns = (onDeleteClicked?: (program: Program) => void) =>
     columnHelper.display({
       id: 'actions',
       cell: ({ row }) => (
-        <ProgramActions
-          program={row.original}
+        <RowActions
+          label={row.original.name}
+          detailHref={`/dashboard/programs/${row.original.id}`}
+          isDeleting={isDeleting(row.original)}
           onDeleteClicked={() => {
             if (onDeleteClicked) {
               onDeleteClicked(row.original)
@@ -58,16 +66,18 @@ type ProgramsTableProps = {
 export default function ProgramsTable({ programs }: ProgramsTableProps) {
   // Track program id to its loading toast id
   const pendingDeletionRecord = useRef<Record<string, string | number>>({})
-  const { deleteProgram } = useDeleteProgram((program, data) => {
-    const loadingToastId = pendingDeletionRecord.current[program.id]
-    toast.dismiss(loadingToastId)
-    if (data.data) {
-      toast.success(`${program.name} berhasil dihapus`)
-    }
-    if (data.error) {
-      toast.error(data.error.title, { description: data.error.detail })
-    }
-  })
+  const { deleteProgram, pendingDeletion } = useDeleteProgram(
+    (program, data) => {
+      const loadingToastId = pendingDeletionRecord.current[program.id]
+      toast.dismiss(loadingToastId)
+      if (data.data) {
+        toast.success(`${program.name} berhasil dihapus`)
+      }
+      if (data.error) {
+        toast.error(data.error.title, { description: data.error.detail })
+      }
+    },
+  )
 
   const programDeleteDialogController = useDeleteDialog<Program>({
     onDeleted(p) {
@@ -77,8 +87,11 @@ export default function ProgramsTable({ programs }: ProgramsTableProps) {
     },
   })
 
-  const columns = createColumns((p) => {
-    programDeleteDialogController.open(p)
+  const columns = createColumns({
+    isDeleting: (p) => pendingDeletion.includes(p),
+    onDeleteClicked: (p) => {
+      programDeleteDialogController.open(p)
+    },
   })
 
   return (
