@@ -1,24 +1,13 @@
 'use client'
 
-import {
-  createColumnHelper,
-  tableFeatures,
-  useTable,
-} from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import { ProgramDegreeLevel, type Program } from '@/lib/programs/program.types'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../ui/table'
 import ProgramActions from './program-actions'
 import { useDeleteProgram } from '@/lib/programs/programs.hook'
 import { toast } from 'sonner'
 import { useRef } from 'react'
 import { DeleteDialog, useDeleteDialog } from '../common/delete-dialog'
+import { DataTable, type DefaultTableFeatures } from '../common/data-table'
 
 const DEGREE_LEVEL_LABELS: Record<ProgramDegreeLevel, string> = {
   [ProgramDegreeLevel.bachelor]: 'S1 - Sarjana',
@@ -26,9 +15,7 @@ const DEGREE_LEVEL_LABELS: Record<ProgramDegreeLevel, string> = {
   [ProgramDegreeLevel.doctorate]: 'S3 - Doktor',
 }
 
-const features = tableFeatures({})
-
-const columnHelper = createColumnHelper<typeof features, Program>()
+const columnHelper = createColumnHelper<DefaultTableFeatures, Program>()
 
 const createColumns = (onDeleteClicked?: (program: Program) => void) =>
   columnHelper.columns([
@@ -93,68 +80,15 @@ export default function ProgramsTable({ programs }: ProgramsTableProps) {
   const columns = createColumns((p) => {
     programDeleteDialogController.open(p)
   })
-  const table = useTable({ features, columns, data: programs })
 
   return (
     <>
-      <div
-        className="w-full flex-1 min-h-0 overflow-auto rounded-md border"
-        data-testid="ProgramsTable"
-      >
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const smallHeader =
-                    header.id === 'number' || header.id === 'actions'
-
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className={smallHeader ? 'w-16 text-center' : undefined}
-                    >
-                      {header.isPlaceholder ? null : (
-                        <table.FlexRender header={header} />
-                      )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getAllCells().map((cell) => {
-                    const smallHeader =
-                      cell.column.id === 'number' ||
-                      cell.column.id === 'actions'
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        className={smallHeader ? 'text-center' : undefined}
-                      >
-                        <table.FlexRender cell={cell} />
-                      </TableCell>
-                    )
-                  })}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="min-h-24 h-full text-center"
-                >
-                  Belum ada program studi yang ditambahkan
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={programs}
+        emptyMessage="Belum ada program studi yang ditambahkan"
+        testId="ProgramsTable"
+      />
 
       <DeleteDialog
         controller={programDeleteDialogController}
