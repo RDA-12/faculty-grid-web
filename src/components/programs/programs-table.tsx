@@ -18,10 +18,7 @@ import ProgramActions from './program-actions'
 import { useDeleteProgram } from '@/lib/programs/programs.hook'
 import { toast } from 'sonner'
 import { useRef } from 'react'
-import {
-  ProgramActionDeleteDialog,
-  useProgramDeleteDialog,
-} from './program-action-dialog'
+import { DeleteDialog, useDeleteDialog } from '../common/delete-dialog'
 
 const DEGREE_LEVEL_LABELS: Record<ProgramDegreeLevel, string> = {
   [ProgramDegreeLevel.bachelor]: 'S1 - Sarjana',
@@ -85,7 +82,7 @@ export default function ProgramsTable({ programs }: ProgramsTableProps) {
     }
   })
 
-  const programDeleteDialogController = useProgramDeleteDialog({
+  const programDeleteDialogController = useDeleteDialog<Program>({
     onDeleted(p) {
       const toastId = toast.loading(`Menghapus ${p.name}...`)
       pendingDeletionRecord.current[p.id] = toastId
@@ -159,7 +156,11 @@ export default function ProgramsTable({ programs }: ProgramsTableProps) {
         </Table>
       </div>
 
-      <ProgramActionDeleteDialog controller={programDeleteDialogController} />
+      <DeleteDialog
+        controller={programDeleteDialogController}
+        accessKey="name"
+        entityName="program studi"
+      />
     </>
   )
 }

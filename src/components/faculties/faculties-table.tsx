@@ -18,10 +18,7 @@ import FacultiesAction from './faculty-actions'
 import { useDeleteFaculty } from '@/lib/faculties/faculties.hook'
 import { toast } from 'sonner'
 import { useRef } from 'react'
-import {
-  FacultyActionDeleteDialog,
-  useFacultyDeleteDialog,
-} from './faculty-action-dialog'
+import { DeleteDialog, useDeleteDialog } from '../common/delete-dialog'
 
 const features = tableFeatures({})
 
@@ -74,7 +71,7 @@ export default function FacultiesTable({ faculties }: FacultiesTableProps) {
     }
   })
 
-  const facultyDeleteDialogController = useFacultyDeleteDialog({
+  const facultyDeleteDialogController = useDeleteDialog<Faculty>({
     onDeleted(f) {
       const toastId = toast.loading(`Menghapus ${f.name}...`)
       pendingDeletionRecord.current[f.id] = toastId
@@ -148,7 +145,11 @@ export default function FacultiesTable({ faculties }: FacultiesTableProps) {
         </Table>
       </div>
 
-      <FacultyActionDeleteDialog controller={facultyDeleteDialogController} />
+      <DeleteDialog
+        controller={facultyDeleteDialogController}
+        accessKey="name"
+        entityName="fakultas"
+      />
     </>
   )
 }

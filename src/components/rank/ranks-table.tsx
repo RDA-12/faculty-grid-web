@@ -18,10 +18,7 @@ import RankActions from './rank-actions'
 import { useDeleteRank } from '@/lib/rank/rank.hook'
 import { toast } from 'sonner'
 import { useRef } from 'react'
-import {
-  RankActionDeleteDialog,
-  useRankDeleteDialog,
-} from './rank-action-dialog'
+import { DeleteDialog, useDeleteDialog } from '../common/delete-dialog'
 
 const RANK_TYPE_LABELS: Record<RankType, string> = {
   [RankType.asn]: 'ASN',
@@ -84,7 +81,7 @@ export default function RanksTable({ ranks }: RanksTableProps) {
     }
   })
 
-  const rankDeleteDialogController = useRankDeleteDialog({
+  const rankDeleteDialogController = useDeleteDialog<Rank>({
     onDeleted(r) {
       const toastId = toast.loading(`Menghapus ${r.name}...`)
       pendingDeletionRecord.current[r.id] = toastId
@@ -158,7 +155,11 @@ export default function RanksTable({ ranks }: RanksTableProps) {
         </Table>
       </div>
 
-      <RankActionDeleteDialog controller={rankDeleteDialogController} />
+      <DeleteDialog
+        controller={rankDeleteDialogController}
+        accessKey="name"
+        entityName="pangkat/golongan"
+      />
     </>
   )
 }
