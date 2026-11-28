@@ -1,4 +1,5 @@
 import z from 'zod'
+import { PaginationQuerySchema } from '../common/pagination'
 import { RankType } from './rank.types'
 
 export const CreateRankSchema = z.object({
@@ -11,3 +12,12 @@ export const CreateRankSchema = z.object({
 })
 
 export type CreateRankRequest = z.infer<typeof CreateRankSchema>
+
+export const RanksQueryScheme = z
+  .object({
+    search: z.string().optional(),
+    type: z.enum(RankType).optional(),
+  })
+  .and(PaginationQuerySchema)
+
+export type RanksQueryParams = z.input<typeof RanksQueryScheme>

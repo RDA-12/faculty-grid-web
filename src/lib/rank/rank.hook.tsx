@@ -3,14 +3,37 @@
 import {
   useMutation,
   useMutationState,
+  useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import type { CreateRankRequest } from './rank.schema'
+import type { CreateRankRequest, RanksQueryParams } from './rank.schema'
 import { createRankAction } from './rank.action'
+import { getRanksQuery, type GetRanksQueryResult } from './rank.query'
+import httpClient from '../common/http-client/http-client.browser'
 import type { ActionState } from '../common/types'
 import type { Rank } from './rank.types'
 
 const RANKS_KEY = ['ranks'] as const
+
+export function useRanks(
+  initialState?: GetRanksQueryResult,
+  params?: RanksQueryParams,
+) {
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: params ? [...RANKS_KEY, params] : RANKS_KEY,
+    queryFn: () => getRanksQuery(httpClient, params),
+    initialData: initialState,
+  })
+
+  return {
+    ranks: data?.data ?? null,
+    error: isFetching ? null : (data?.error ?? null),
+    isLoading: isFetching,
+    refresh: () => {
+      void refetch()
+    },
+  }
+}
 
 export function useCreateRank(
   onSettled?: (
