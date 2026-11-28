@@ -1,8 +1,8 @@
 export const instant = false
 
 import PageScaffold from '@/components/common/page-scaffold'
-import AddProgramButton from '@/components/programs/add-program-button'
 import ProgramsList from '@/components/programs/programs-list'
+import ProgramsSearchBar from '@/components/programs/programs-search-bar'
 import httpClient from '@/lib/common/http-client/http-client.server'
 import { ProgramDegreeLevel } from '@/lib/programs/program.types'
 import { getProgramsQuery } from '@/lib/programs/programs.query'
@@ -49,7 +49,7 @@ export default async function ProgramsPage(
       ]}
     >
       <main className="flex-1 flex flex-col gap-4 min-h-0">
-        <AddProgramButton />
+        <ProgramsSearchBar initialParams={params} />
         <ProgramsList
           initial={result.error?.status === 401 ? undefined : result}
           params={params}
